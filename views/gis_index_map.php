@@ -144,8 +144,9 @@
 							    
 							});
 							    	
-					    	
-							shown_layers[shown_layers.length] = geojson_layers[i];				
+					    	if(layer['shown']>0){
+								shown_layers[shown_layers.length] = geojson_layers[i];				
+					    	}
 							overlayMaps[label] = geojson_layers[i];						
 						}
 				});

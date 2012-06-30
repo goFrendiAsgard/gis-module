@@ -6,7 +6,7 @@
  */
 class Install extends CMS_Module_Installer {
     protected $DEPENDENCIES = array();
-    protected $NAME = 'gofrendi.gis';
+    protected $NAME = 'gofrendi.gis.core';
 
     //this should be what happen when user install this module
     protected function do_install(){
@@ -61,6 +61,7 @@ class Install extends CMS_Module_Installer {
     		  `map_id` int(11) NOT NULL,
 			  `layer_name` varchar(45) NOT NULL,
 			  `layer_desc` varchar(45) DEFAULT NULL,
+    		  `shown` tinyint(4) NOT NULL DEFAULT '1',
 			  `radius` int(11) NOT NULL DEFAULT '8',
 			  `fill_color` varchar(45) NOT NULL DEFAULT '#FF7800',
 			  `color` varchar(45) NOT NULL DEFAULT '#000000',
@@ -79,9 +80,9 @@ class Install extends CMS_Module_Installer {
     	");
     	
     	$this->db->query("
-	    	INSERT INTO `gis_layer` (`layer_id`, `map_id`, `layer_name`, `layer_desc`, `radius`, `fill_color`, `color`, `weight`, `opacity`, `fill_opacity`, `image_url`, `json_url`, `display_feature_url`, `edit_feature_url`, `delete_feature_url`) VALUES
-				(1, 1, 'Airports (no icon)', 'Airports in all alaska', 4, '#ff7800', '#000000', 1, 1, 0.8, NULL, '@site_url/gis/alaska_airport/geojson', NULL, NULL, NULL),
-    			(2, 1, 'Airports (with icon)', 'Airports in all alaska', 4, '#ff7800', '#000000', 1, 1, 0.8, '@base_url/modules/gis/assets/images/black_plane.png', '@site_url/gis/alaska_airport/geojson', NULL, NULL, NULL);
+	    	INSERT INTO `gis_layer` (`layer_id`, `map_id`, `layer_name`, `layer_desc`, `shown`, `radius`, `fill_color`, `color`, `weight`, `opacity`, `fill_opacity`, `image_url`, `json_url`, `display_feature_url`, `edit_feature_url`, `delete_feature_url`) VALUES
+				(1, 1, 'Airports (no icon)', 'Airports in all alaska', 1, 4, '#ff7800', '#000000', 1, 1, 0.8, NULL, '@site_url/gis/alaska_airport/geojson', NULL, NULL, NULL),
+    			(2, 1, 'Airports (with icon)', 'Airports in all alaska', 0, 4, '#ff7800', '#000000', 1, 1, 0.8, '@base_url/modules/gis/assets/images/black_plane.png', '@site_url/gis/alaska_airport/geojson', NULL, NULL, NULL);
     	");
     	
         $this->db->query("          
