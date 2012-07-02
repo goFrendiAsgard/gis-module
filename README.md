@@ -30,6 +30,7 @@ HOWTO:
     - http://your_domain.com/No-CMS_path/gis/index/map_id/longitude/latitude
 - Using geoformat library to change mysql into geojson:
     - In any controller of any module, write a function like this:
+
             public function geojson(){
                 // load geoformat library
                 $this->load->library($this->cms_module_path('gofrendi.gis.core').'/geoformat');
