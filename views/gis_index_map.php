@@ -158,7 +158,7 @@
 
 			// define map parameter
 			var map = new L.Map('map', {
-				center: new L.LatLng(map_longitude, map_latitude), zoom: map_zoom,
+				center: new L.LatLng(map_latitude, map_longitude), zoom: map_zoom,
 			});
 			// add shown layers to the map
 			for(var i=0; i<shown_layers.length; i++){

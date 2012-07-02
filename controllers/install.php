@@ -38,8 +38,8 @@ class Install extends CMS_Module_Installer {
 			  `map_id` int(11) NOT NULL AUTO_INCREMENT,
 			  `map_name` varchar(45) NOT NULL,
 			  `map_desc` varchar(45) DEFAULT NULL,
-			  `longitude` double NOT NULL DEFAULT '0',
 			  `latitude` double NOT NULL DEFAULT '0',
+			  `longitude` double NOT NULL DEFAULT '0',
 			  `gmap_roadmap` tinyint(4) NOT NULL DEFAULT '1',
 			  `gmap_satellite` tinyint(4) NOT NULL DEFAULT '1',
 			  `gmap_hybrid` tinyint(4) NOT NULL DEFAULT '1',
@@ -51,8 +51,9 @@ class Install extends CMS_Module_Installer {
     	");
     	
     	$this->db->query("
-    		INSERT INTO `gis_map` (`map_id`, `map_name`, `map_desc`, `longitude`, `latitude`, `gmap_roadmap`, `gmap_satellite`, `gmap_hybrid`, `zoom`, `height`, `width`) VALUES
-    			(1, 'Alaska', 'A map of Alaska', 60.293165, -158.959803, 1, 1, 1, 5, '500px', '100%');
+    		INSERT INTO `gis_map` (`map_id`, `map_name`, `map_desc`, `latitude`, `longitude`, `gmap_roadmap`, `gmap_satellite`, `gmap_hybrid`, `zoom`, `height`, `width`) VALUES
+    			(1, 'Alaska', 'A map of Alaska', 60.293165, -158.959803, 1, 1, 1, 5, '500px', '100%'),
+				(2, 'Jayapura', 'A map of Jayapura City', -2.54128, 140.71373, 0, 0, 1, 10, '500px', '100%');
     	");
     	
     	$this->db->query("
@@ -204,7 +205,7 @@ class Install extends CMS_Module_Installer {
         		
         ");
 
-        $this->add_navigation("gis_index", "gis", $this->cms_module_path()."/index", 4);
+        $this->add_navigation("gis_index", "Geographic Information System", $this->cms_module_path()."/index", 1);
         $this->add_navigation("gis_map", "Map", $this->cms_module_path()."/gis_map", 4, "gis_index");        
         $this->add_navigation("gis_cloudmade_basemap", "Cloudmade Base", $this->cms_module_path()."/gis_cloudmade_basemap", 4, "gis_index");
         $this->add_navigation("gis_layer", "Layer", $this->cms_module_path()."/gis_layer", 4, "gis_index");
