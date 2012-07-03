@@ -8,19 +8,31 @@
 class gis extends CMS_Controller {
 	
     public function index($map_id=NULL, $longitude=NULL, $latitude=NULL){
-    	$this->load->Model('gis/Map_Model');
-    	if(!isset($map_id)){
+    	$this->load->Model($this->cms_module_path().'/Map_Model');
+    	if(!isset($map_id)){ //show list
     		$map = $this->Map_Model->get_map();
     		$data = array("map_list"=> $map);
-    		$this->view('gis/gis_index_list', $data, 'gis_index');    		
-    	}else{
+    		$this->view($this->cms_module_path().'/gis_index_list', $data, 'gis_index');    		
+    	}else{ //show the map
     		$map = $this->Map_Model->get_map($map_id);
     		if(isset($longitude)) $map["longitude"] = $longitude;
     		if(isset($latitude)) $map["latitude"] = $latitude;
     		$data = array("map"=> $map);
-    		$this->view('gis/gis_index_map', $data, 'gis_index');    		
+    		$this->view($this->cms_module_path().'/gis_index_map', $data, 'gis_index');    		
     	}
     }    
+    
+    public function geojson($layer_id){
+    	$this->load->Model($this->cms_module_path().'/Map_Model');
+    	$this->load->library($this->cms_module_path().'/geoformat');
+    	
+    	$data = $this->Map_Model->get_layer_json_parameter($layer_id);
+    	$SQL = $data["json_sql"];
+    	$popup_content = $data["json_popup_content"];
+    	$shape_column = $data["json_shape_column"];
+    	
+    	echo $this->geoformat->sql2json($SQL, $shape_column, $popup_content);
+    }
 
     public function gis_map(){
         $crud = new grocery_CRUD();
@@ -59,12 +71,19 @@ class gis extends CMS_Controller {
 	    	->display_as('opacity','Style\'s Opacity')
 	    	->display_as('fill_opacity','Style\'s Fill Opacity')
 	    	->display_as('image_url','Style\'s Icon')
+	    	->display_as('json_sql','SQL')
+	    	->display_as('json_shape_column','Shape Column')
+	    	->display_as('json_popup_content','Popup Content')
+	    	->display_as('use json_url','Use GeoJSON url to override')
     		->display_as('json_url','GeoJSON url')
 	    	->display_as('display_feature_url','Display url')
 	    	->display_as('edit_feature_url','Editting url')
     		->display_as('delete_feature_url','Deleting url');
     	$crud->set_relation('map_id', 'gis_map', 'map_name');
+    	$crud->change_field_type('use_json_url', 'true_false');
     	$crud->change_field_type('shown', 'true_false');
+    	$crud->unset_texteditor('json_sql');
+    	$crud->unset_texteditor('json_popup_content');
     	$output = $crud->render();
     	$this->view("grocery_CRUD", $output, "gis_layer");
     }
