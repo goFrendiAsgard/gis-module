@@ -81,6 +81,15 @@
 							var point_config = null;
 							var style = null;
 							var is_point = geojson_features[i]['features'][0]['geometry']['type']=='Point';
+							style = {
+									radius : layer['radius'],
+									fillColor: layer['fill_color'],
+									color: layer['color'],
+									weight: layer['weight'],
+									opacity: layer['opacity'],
+									fillOpacity: layer['fill_opacity']
+								};
+							
 							// if point
 							if(is_point){
 								if(layer['image_url']){
@@ -107,15 +116,7 @@
 										        });
 										    }																			
 										};
-								}else{
-									style = {
-										radius : layer['radius'],
-										fillColor: layer['fill_color'],
-										color: layer['color'],
-										weight: layer['weight'],
-										opacity: layer['opacity'],
-										fillOpacity: layer['fill_opacity']
-									};
+								}else{									
 									point_config = {
 										    pointToLayer: function (latlng) {
 										        return new L.CircleMarker(latlng, 
