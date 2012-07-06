@@ -7,6 +7,7 @@
 				$query = $this->db->query($SQL);
 				if($query->num_rows()>0){
 					$row = $query->row_array();
+					$row['layer_groups'] = $this->get_layer_group($map_id);
 					$row['layers'] = $this->get_layer($map_id);
 					$row['cloudmade_basemap'] = $this->get_cloudmade_basemap($map_id);
 					return $row;
@@ -22,6 +23,18 @@
 				}
 				return $data;
 			}
+		}
+		
+		public function get_layer_group($map_id){
+			$SQL = "SELECT DISTINCT(layer_name) AS name, MAX(shown) AS shown
+				FROM gis_layer WHERE map_id = '".addslashes($map_id)."'
+				GROUP BY name";
+			$query = $this->db->query($SQL);
+			$data = array();
+			foreach($query->result_array() as $row){				
+				$data[] = $row;
+			}
+			return $data;			
 		}
 		
 		public function get_layer($map_id){
