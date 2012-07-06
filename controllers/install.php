@@ -85,9 +85,9 @@ class Install extends CMS_Module_Installer {
     	");
     	
     	$this->db->query("
-	    	INSERT INTO `gis_layer` (`layer_id`, `map_id`, `layer_name`, `layer_desc`, `shown`, `radius`, `fill_color`, `color`, `weight`, `opacity`, `fill_opacity`, `image_url`, `json_url`, `display_feature_url`, `edit_feature_url`, `delete_feature_url`) VALUES
-				(1, 1, 'Airports (no icon)', 'Airports in all alaska', 1, 4, '#ff7800', '#000000', 1, 1, 0.8, NULL, '@site_url/gis/alaska_airport/geojson', NULL, NULL, NULL),
-				(2, 1, 'Airports (with icon)', 'Airports in all alaska', 0, 4, '#ff7800', '#000000', 1, 1, 0.8, '@base_url/modules/gis/assets/images/black_plane.png', '@site_url/gis/alaska_airport/geojson', NULL, NULL, NULL);
+	    	INSERT INTO `gis_layer` (`layer_id`, `map_id`, `layer_name`, `layer_desc`, `shown`, `radius`, `fill_color`, `color`, `weight`, `opacity`, `fill_opacity`, `image_url`, `json_sql`, `json_shape_column`, `json_popup_content`, `use_json_url`, `json_url`, `display_feature_url`, `edit_feature_url`, `delete_feature_url`) VALUES
+				(1, 1, 'Airports (no icon)', 'Airports in all alaska', 1, 4, '#ff7800', '#000000', 1, 1, 0.8, NULL, NULL, NULL, NULL, 1, '@site_urlgis/alaska_airport/geojson', NULL, NULL, NULL),
+				(2, 1, 'Airports (with icon)', 'Airports in all alaska', 0, 4, '#ff7800', '#000000', 1, 1, 0.8, '@base_url/modules/gis/assets/images/black_plane.png', 'SELECT `cat`, `name`, `use`, `elev`, astext(`shape`) as `shape` \nFROM gis_alaska_airport LIMIT 20;', 'shape', '<b>@name</b><br />', 0, '@site_url/gis/alaska_airport/geojson', NULL, NULL, NULL);
     	");
     	
         $this->db->query("          
