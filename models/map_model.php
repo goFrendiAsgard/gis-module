@@ -29,8 +29,9 @@
 			$SQL = "SELECT 
 					DISTINCT(IF(group_name='' OR group_name iS NULL, layer_name, group_name)) AS name, 
 					MAX(shown) AS shown
-				FROM gis_layer WHERE map_id = '".addslashes($map_id)."'
-				GROUP BY name";
+				FROM gis_layer WHERE map_id = '".addslashes($map_id)."'				
+				GROUP BY name
+				ORDER BY MIN(layer_id)";
 			$query = $this->db->query($SQL);
 			$data = array();
 			foreach($query->result_array() as $row){				

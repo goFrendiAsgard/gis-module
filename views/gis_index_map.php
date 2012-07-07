@@ -8,6 +8,15 @@
 	    #change_feature{
 	        z-index:3;
 	    }
+	    .layer_legend{
+	    	list-style-type: none;
+	    }
+	    .layer_legend div{
+	    	margin: 2px;
+	    	width: 10px;
+	    	height: 10px;
+	    	display: inline-block;
+	    }
 	</style>
 	<script type="text/javascript" src="<?php echo base_url(); ?>modules/<?php echo $cms["module_path"]; ?>/assets/js/leaflet/dist/leaflet.js"></script>
 	<?php
@@ -69,6 +78,7 @@
 			
 
 			var layer_groups = new Object();
+			var layer_group_indexes = new Object();
 			var overlayMaps = new Object();
 			for(var i=0; i<map_layer_groups.length; i++){
 				group = map_layer_groups[i];				
@@ -79,6 +89,7 @@
 					shown_layers[shown_layers.length] = layer_groups[label];				
 		    	}
 				overlayMaps[label] = layer_groups[label];
+				layer_group_indexes[label] = i+1;
 			}
 	
 			
@@ -102,13 +113,25 @@
 			for(var i=0; i<map_layers.length; i++){
 				layer = map_layers[i];
 				label = layer["group_name"];
+				layer_name = layer["layer_name"];
 				json_url = layer["json_url"];
 				
 				// TODO : add image/color
-				//$('.leaflet-control-layers-overlays label:nth-child('+i+')').append(' <b>'+label+'</b>');
+				var label_index = layer_group_indexes[label];
+				var label_identifier = '.leaflet-control-layers-overlays label:nth-child('+label_index+')';
+				var ul_identifier = label_identifier+' ul';
+				if ($(ul_identifier).length == 0){
+					$(label_identifier).append('<ul></ul>');
+				}
+				$(ul_identifier).append('<li id="layer_'+i+'" class="layer_legend"><div></div>'+layer_name+'</li>');
+				var div_identifier = ul_identifier+' li#layer_'+i+' div';
+				if(layer['image_url']!=''){
+					$(div_identifier).css({'background':'url('+layer['image_url']+')'});
+				}else{
+					$(div_identifier).css({'background-color': layer['fill_color']});
+				}	
 				
 				$.ajax({
-					//async : false,
 					parse_data: {
 						layer: layer, 
 						label: label},
