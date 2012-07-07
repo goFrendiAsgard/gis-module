@@ -48,18 +48,22 @@
 				baseMaps[cloudmade_name] = new L.TileLayer(cloudmade_url, cloudmade_options);
 				if(shown_layers.length == 0) shown_layers[0] = baseMaps[cloudmade_name];
 			}
-			if(map_gmap_roadmap){
-				baseMaps[google_roadmap_caption] = new L.Google('ROADMAP');
-				if(shown_layers.length == 0) shown_layers[0] = baseMaps[google_roadmap_caption];
-				shown_layers[shown_layers.length] = baseMaps[google_roadmap_caption];
-			}
-			if(map_gmap_satellite){
-				baseMaps[google_satellite_caption] = new L.Google('SATELLITE');
-				if(shown_layers.length == 0) shown_layers[0] = baseMaps[google_satellite_caption];
-			}
-			if(map_gmap_hybrid){
-				baseMaps[google_hybrid_caption] = new L.Google('HYBRID');
-				if(shown_layers.length == 0) shown_layers[0] = baseMaps[google_hybrid_caption];
+			try{
+				if(map_gmap_roadmap){
+					baseMaps[google_roadmap_caption] = new L.Google('ROADMAP');
+					if(shown_layers.length == 0) shown_layers[0] = baseMaps[google_roadmap_caption];
+					shown_layers[shown_layers.length] = baseMaps[google_roadmap_caption];
+				}
+				if(map_gmap_satellite){
+					baseMaps[google_satellite_caption] = new L.Google('SATELLITE');
+					if(shown_layers.length == 0) shown_layers[0] = baseMaps[google_satellite_caption];
+				}
+				if(map_gmap_hybrid){
+					baseMaps[google_hybrid_caption] = new L.Google('HYBRID');
+					if(shown_layers.length == 0) shown_layers[0] = baseMaps[google_hybrid_caption];
+				}
+			}catch(err){
+				$("div#message").append('Cannot create google maps');	
 			}
 			
 			
@@ -97,7 +101,7 @@
 
 			for(var i=0; i<map_layers.length; i++){
 				layer = map_layers[i];
-				label = layer["layer_name"];
+				label = layer["group_name"];
 				json_url = layer["json_url"];
 				
 				// TODO : add image/color
@@ -134,7 +138,7 @@
 									Marker_Icon = L.Icon.extend({
 											iconUrl: image_url,
 											shadowUrl: null,
-											iconSize: new L.Point(32, 37),
+											iconSize: new L.Point(20, 20),
 											shadowSize: null,
 											iconAnchor: new L.Point(14, 37),
 											popupAnchor: new L.Point(2, -32)
@@ -196,4 +200,5 @@
 </head>
 <body>
 	<div id="map" style="height: <?php echo $map["height"]; ?>; width: <?php echo $map["width"]; ?>"></div>
+	<div id="message"></div>
 </body>

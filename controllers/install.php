@@ -53,7 +53,7 @@ class Install extends CMS_Module_Installer {
     	$this->db->query("
     		INSERT INTO `gis_map` (`map_id`, `map_name`, `map_desc`, `latitude`, `longitude`, `gmap_roadmap`, `gmap_satellite`, `gmap_hybrid`, `zoom`, `height`, `width`) VALUES
     			(1, 'Alaska', 'A map of Alaska', 60.293165, -158.959803, 1, 1, 1, 5, '500px', '100%'),
-				(2, 'Jayapura', 'A map of Jayapura City', -2.54128, 140.71373, 0, 0, 1, 10, '500px', '100%');
+				(2, 'Sorong', 'Map of Sorong, Papua, Indonesia', -0.87863315453434, 131.2604984393, 0, 0, 1, 18, '500px', '100%');
     	");
     	
     	$this->db->query("
@@ -61,6 +61,7 @@ class Install extends CMS_Module_Installer {
 			  `layer_id` int(11) NOT NULL AUTO_INCREMENT,
     		  `map_id` int(11) NOT NULL,
 			  `layer_name` varchar(45) NOT NULL,
+    		  `group_name` varchar(45) NOT NULL,
 			  `layer_desc` varchar(45) DEFAULT NULL,
     		  `shown` tinyint(4) NOT NULL DEFAULT '1',
 			  `radius` int(11) NOT NULL DEFAULT '8',
@@ -85,9 +86,10 @@ class Install extends CMS_Module_Installer {
     	");
     	
     	$this->db->query("
-	    	INSERT INTO `gis_layer` (`layer_id`, `map_id`, `layer_name`, `layer_desc`, `shown`, `radius`, `fill_color`, `color`, `weight`, `opacity`, `fill_opacity`, `image_url`, `json_sql`, `json_shape_column`, `json_popup_content`, `use_json_url`, `json_url`, `display_feature_url`, `edit_feature_url`, `delete_feature_url`) VALUES
-				(1, 1, 'Airports (no icon)', 'Airports in all alaska', 1, 4, '#ff7800', '#000000', 1, 1, 0.8, NULL, NULL, NULL, NULL, 1, '@site_urlgis/alaska_airport/geojson', NULL, NULL, NULL),
-				(2, 1, 'Airports (with icon)', 'Airports in all alaska', 0, 4, '#ff7800', '#000000', 1, 1, 0.8, '@base_url/modules/gis/assets/images/black_plane.png', 'SELECT `cat`, `name`, `use`, `elev`, astext(`shape`) as `shape` \nFROM gis_alaska_airport LIMIT 20;', 'shape', '<b>@name</b><br />', 0, '@site_url/gis/alaska_airport/geojson', NULL, NULL, NULL);
+	    	INSERT INTO `gis_layer` (`layer_id`, `map_id`, `layer_name`, `group_name`, `layer_desc`, `shown`, `radius`, `fill_color`, `color`, `weight`, `opacity`, `fill_opacity`, `image_url`, `json_sql`, `json_shape_column`, `json_popup_content`, `use_json_url`, `json_url`, `display_feature_url`, `edit_feature_url`, `delete_feature_url`) VALUES
+				(1, 1, 'All Airports', NULL, 'Airports in all alaska', 1, 4, '#ff7800', '#000000', 1, 1, 0.8, NULL, NULL, NULL, NULL, 1, '@site_urlgis/alaska_airport/geojson', NULL, NULL, NULL),
+				(2, 1, 'Civilian/Public', 'Airports by usage', 'Civilian/Public Airport', 0, 4, '#ff7800', '#000000', 1, 1, 0.8, '@base_url/modules/gis/assets/images/black_plane.png', 'SELECT `cat`, `name`, `use`, `elev`, astext(`shape`) as `shape`, x(`shape`) as `lat`, y(`shape`) as `long` \nFROM gis_alaska_airport \nWHERE `use`=\'Civilian/Public\' ;', 'shape', '<b>Civilian Airport</b><br />Name: @name<br />Latitude: @lat<br />Longitude:@long', 0, NULL, NULL, NULL, NULL),
+    			(3, 1, 'Military', 'Airports by usage', 'Military Airport', 0, 4, '#ff0000', '#000000', 1, 1, 0.8, NULL, 'SELECT `cat`, `name`, `use`, `elev`, astext(`shape`) as `shape`, x(`shape`) as `lat`, y(`shape`) as `long` \nFROM gis_alaska_airport \nWHERE `use`=\'Military\' ;', 'shape', '<b>Military Airport</b><br />@name<br />Latitude: @lat<br />Longitude:@long', 0, NULL, NULL, NULL, NULL);
     	");
     	
         $this->db->query("          

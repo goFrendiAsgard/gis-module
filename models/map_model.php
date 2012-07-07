@@ -26,7 +26,9 @@
 		}
 		
 		public function get_layer_group($map_id){
-			$SQL = "SELECT DISTINCT(layer_name) AS name, MAX(shown) AS shown
+			$SQL = "SELECT 
+					DISTINCT(IF(group_name='' OR group_name iS NULL, layer_name, group_name)) AS name, 
+					MAX(shown) AS shown
 				FROM gis_layer WHERE map_id = '".addslashes($map_id)."'
 				GROUP BY name";
 			$query = $this->db->query($SQL);
@@ -39,6 +41,7 @@
 		
 		public function get_layer($map_id){
 			$SQL = "SELECT layer_id, layer_name, layer_desc,
+					IF(group_name='' OR group_name iS NULL, layer_name, group_name) AS group_name,
 	    		    shown, radius, fill_color, color, weight,
 				    opacity, fill_opacity, image_url, use_json_url,
 				    json_url, display_feature_url, edit_feature_url,
