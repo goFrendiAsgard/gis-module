@@ -141,6 +141,7 @@ class gis extends CMS_Controller {
     	$crud->change_field_type('searchable', 'true_false');
     	$crud->unset_texteditor('json_sql');
     	$crud->unset_texteditor('json_popup_content');
+    	$crud->unset_texteditor('json_label');
     	$crud->unset_texteditor('search_sql');
     	$crud->unset_texteditor('search_result_content');
     	$output = $crud->render();

@@ -17,6 +17,11 @@ class Geoformat{
 				$CI->cms_module_path('gofrendi.gis.core').
 				'/classes/geoPHP/geoPHP.inc');
 		
+		$map_region = $CI->input->post('map_region');
+		$search = array('@map_region');
+		$replace = array($map_region);
+		$SQL = $this->replace($SQL, $search, $replace);
+		
 		$features = array();
 		$query = $CI->db->query($SQL);
 		foreach($query->result_array() as $row){

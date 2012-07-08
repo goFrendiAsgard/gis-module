@@ -11,8 +11,10 @@ class Alaska_Airport extends CMS_Controller{
 		$SQL = "
 			SELECT `cat`, `name`, `use`, `elev`, astext(`shape`) as `shape` 
 			FROM gis_alaska_airport 
-			WHERE `use`<>'Military' AND `use`<>'Civilian/Public'";
-		$shape_column = 'shape';
+			WHERE 
+				(`use`<>'Military') AND (`use`<>'Civilian/Public') AND
+				MBRIntersects(`shape`,geomfromtext('@map_region'))=1";
+		$shape_column = 'shape';		
 		
 		$popup_content = '';
 		$popup_content .= '<b>@name</b><br />';

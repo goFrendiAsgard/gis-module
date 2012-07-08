@@ -42,7 +42,9 @@
 				var el = document.createElement('div');
 				el.appendChild(document.createTextNode(this._text));
 				this._setIconStyles(el, 'icon');
-				el.style.textShadow = "2px 2px 2px #fff";
+				el.style.textShadow = "1px 1px 5px #fff";
+				el.style.color = "#000000";
+				el.style.fontSize = "9px";
 				return el;
 			},
 	
@@ -163,17 +165,15 @@
 			// add layer control, so that user can adjust the visibility of the layers
 			layersControl = new L.Control.Layers(baseMaps, overlayMaps);
 			map.addControl(layersControl);
-
 			
-			// AJAX call to show the layers on the map
+			// jquery css hack to show the legends
 			for(var i=0; i<map_layers.length; i++){
 				var layer = map_layers[i];
-				var group_name = layer["group_name"];
 				var layer_name = layer["layer_name"];
-				var json_url = layer["json_url"];
+				var group_name = layer["group_name"];
 				
 				// css hack to modify to legends
-				var label_index = layer_group_indexes[label];
+				var label_index = layer_group_indexes[group_name];
 				var label_identifier = '.leaflet-control-layers-overlays label:nth-child('+label_index+')';
 				var ul_identifier = label_identifier+' ul';
 				if ($(ul_identifier).length == 0){
@@ -185,133 +185,10 @@
 					$(div_identifier).html('<img src="'+layer['image_url']+'" />');
 				}else{
 					$(div_identifier).css({'background-color': layer['fill_color']});
-				}	
-				
-				$.ajax({
-					parse_data: {
-						layer: layer, 
-						group_name: group_name},
-					url : json_url,
-					type : 'GET',
-					dataType : 'json',
-					error : function(response, textStatus, errorThrown){
-							$("#message").append("Failed to load <b>"+
-									this.parse_data.layer["layer_name"]+"</b> layer with status <b>"+
-									textStatus+'</b>, '+errorThrown+'<br />');
-						},
-					success : function(response){
-							layer = this.parse_data.layer;
-							group_name = this.parse_data.group_name;
-							geojson_feature = response;	
-							// make geojson layer
-							var point_config = null;							
-							var style = null;
-							var is_point = geojson_feature['features'][0]['geometry']['type']=='Point';
-							style = {
-									radius : layer['radius'],
-									fillColor: layer['fill_color'],
-									color: layer['color'],
-									weight: layer['weight'],
-									opacity: layer['opacity'],
-									fillOpacity: layer['fill_opacity']
-								};
-							
-							// if point
-							if(is_point){
-								if(layer['image_url']){
-									var image_url = layer['image_url'];
-									point_config = {
-											pointToLayer: function (latlng){
-										        return new L.Marker(latlng, {
-										            icon: new L.Icon({
-											            	iconUrl: image_url,
-															shadowUrl: null,
-															iconSize: new L.Point(20,20),//(32, 37),
-															shadowSize: null,
-															iconAnchor: new L.Point(14, 20),
-															popupAnchor: new L.Point(2, -20)
-											            })
-										        });
-										    }																			
-										};
-								}else{									
-									point_config = {
-										    pointToLayer: function (latlng) {
-										        return new L.CircleMarker(latlng, 
-												        style
-										        );
-										    },
-										}; 
-								}
-							}
+				}
+			}
 
-							geojson_layer = new L.GeoJSON(geojson_feature, point_config	);
-
-							geojson_layer.on("featureparse", function (e) {
-								// the popups
-								if (e.properties && e.properties.popupContent) {
-							        popupContent = e.properties.popupContent;
-							    }else{
-								    popupContent = '';
-							    }
-							    e.layer.bindPopup(popupContent);
-
-							    // the style (for point we need special treatment)
-							    if(!is_point){
-							    	e.layer.setStyle(style);
-							    }
-							    
-							});
-							
-							geojson_layer.addGeoJSON(geojson_feature);
-
-							// add geojson layer to layer_groups	
-							layer_groups[group_name].addLayer(geojson_layer);
-
-							// label for point feature
-							if(is_point){
-								// for each point, we should make a more elegant way
-								for(var i=0; i<geojson_feature['features'].length; i++){
-									var geojson_single_feature = {
-											"type":"FeatureCollection",
-											"features":[geojson_feature['features'][i]]
-									}
-									var label = geojson_feature['features'][i]['properties']['label']
-									var point_config = {
-											pointToLayer: function (latlng){
-										        return new L.Marker(latlng,{
-										            icon: new L.Icon.Text(label,{})
-										        });
-										    }																			
-										};
-									var geojson_label = new L.GeoJSON(geojson_single_feature, point_config	);
-									geojson_label.on("featureparse", function (e) {
-										// the popups
-										if (e.properties && e.properties.popupContent) {
-									        popupContent = e.properties.popupContent;
-									    }else{
-										    popupContent = '';
-									    }
-									    e.layer.bindPopup(popupContent);	
-									    // the style (for point we need special treatment)
-									    if(!is_point){
-									    	e.layer.setStyle(style);
-									    }
-									    
-									});
-									
-									geojson_label.addGeoJSON(geojson_single_feature);
-	
-									// add geojso_label to layer_group
-									layer_groups[group_name].addLayer(geojson_label);
-								}
-							}
-											
-						}
-				});
-
-				
-			}// end of AJAX call
+			fetchLayer();
 
 			// search button
 			$("#btn_gis_search").click(function(){
@@ -358,6 +235,166 @@
 		        map.setView(newLocation, 20);
 				return false;
 			});
+
+			// refresh the features
+			map.on('dragend', fetchLayer);
+			map.on('zoomend', fetchLayer);
+
+
+			function fetchLayer(){
+				var bounds = map.getBounds();
+				var southWest = bounds.getSouthWest();
+				var northEast = bounds.getNorthEast();
+				var map_region = 'POLYGON(('+
+					northEast.lng+' '+northEast.lat+', '+
+					northEast.lng+' '+southWest.lat+', '+
+					southWest.lng+' '+southWest.lat+', '+
+					southWest.lng+' '+northEast.lat+', '+
+					northEast.lng+' '+northEast.lat+'))';
+
+				// delete layers from groups				
+				for(var i=0; i<map_layer_groups.length; i++){
+					group = map_layer_groups[i];
+					group_name = group['name'];				
+					layer_groups[group_name].clearLayers();
+				}
+				// add layers to the groups
+				for(var i=0; i<map_layers.length; i++){
+					var layer = map_layers[i];
+					var group_name = layer["group_name"];
+					var json_url = layer["json_url"];	
+					
+
+					// get geoJSON from the server
+					$.ajax({
+						parse_data: {
+							layer: layer, 
+							group_name: group_name},
+						url : json_url,
+						type : 'POST',
+						data : {
+							map_region: map_region},
+						dataType : 'json',
+						error : function(response, textStatus, errorThrown){
+								$("#message").append("Failed to load <b>"+
+										this.parse_data.layer["layer_name"]+"</b> layer with status <b>"+
+										textStatus+'</b>, '+errorThrown+'<br />');
+							},
+						success : function(response){
+								layer = this.parse_data.layer;
+								group_name = this.parse_data.group_name;
+								geojson_feature = response;	
+								// make geojson layer
+								var point_config = null;							
+								var style = null;
+								var is_point = geojson_feature['features'][0]['geometry']['type']=='Point';
+								style = {
+										radius : layer['radius'],
+										fillColor: layer['fill_color'],
+										color: layer['color'],
+										weight: layer['weight'],
+										opacity: layer['opacity'],
+										fillOpacity: layer['fill_opacity']
+									};
+								
+								// if point
+								if(is_point){
+									if(layer['image_url']){
+										var image_url = layer['image_url'];
+										point_config = {
+												pointToLayer: function (latlng){
+											        return new L.Marker(latlng, {
+											            icon: new L.Icon({
+												            	iconUrl: image_url,
+																shadowUrl: null,
+																iconSize: new L.Point(20,20),//(32, 37),
+																shadowSize: null,
+																iconAnchor: new L.Point(14, 20),
+																popupAnchor: new L.Point(2, -20)
+												            })
+											        });
+											    }																			
+											};
+									}else{									
+										point_config = {
+											    pointToLayer: function (latlng) {
+											        return new L.CircleMarker(latlng, 
+													        style
+											        );
+											    },
+											}; 
+									}
+								}
+
+								geojson_layer = new L.GeoJSON(geojson_feature, point_config	);
+
+								geojson_layer.on("featureparse", function (e) {
+									// the popups
+									if (e.properties && e.properties.popupContent) {
+								        popupContent = e.properties.popupContent;
+								    }else{
+									    popupContent = '';
+								    }
+								    e.layer.bindPopup(popupContent);
+
+								    // the style (for point we need special treatment)
+								    if(!is_point){
+								    	e.layer.setStyle(style);
+								    }
+								    
+								});
+								
+								geojson_layer.addGeoJSON(geojson_feature);								
+
+								// add geojson layer to layer_groups	
+								layer_groups[group_name].addLayer(geojson_layer);
+
+								// label for point feature
+								if(is_point){
+									// for each point, we should make a more elegant way
+									for(var i=0; i<geojson_feature['features'].length; i++){
+										var geojson_single_feature = {
+												"type":"FeatureCollection",
+												"features":[geojson_feature['features'][i]]
+										}
+										var label = geojson_feature['features'][i]['properties']['label']
+										var point_config = {
+												pointToLayer: function (latlng){
+											        return new L.Marker(latlng,{
+											            icon: new L.Icon.Text(label,{})
+											        });
+											    }																			
+											};
+										var geojson_label = new L.GeoJSON(geojson_single_feature, point_config	);
+										geojson_label.on("featureparse", function (e) {
+											// the popups
+											if (e.properties && e.properties.popupContent) {
+										        popupContent = e.properties.popupContent;
+										    }else{
+											    popupContent = '';
+										    }
+										    e.layer.bindPopup(popupContent);	
+										    // the style (for point we need special treatment)
+										    if(!is_point){
+										    	e.layer.setStyle(style);
+										    }
+										    
+										});
+										
+										geojson_label.addGeoJSON(geojson_single_feature);
+		
+										// add geojso_label to layer_group
+										layer_groups[group_name].addLayer(geojson_label);
+									}
+								}
+												
+							}
+					});
+
+					
+				}// end of AJAX call
+			}// end of function fetchLayer
+			
 		
 		});
 	</script>
