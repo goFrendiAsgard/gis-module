@@ -2,7 +2,7 @@
 
 class Geoformat{
 	
-	private function replace($str,$search,$replace){
+	public function replace($str,$search,$replace){
 		if(count($search)==count($replace)){
 			for($i=0; $i<count($search); $i++){
 				$str = str_replace($search, $replace, $str);
@@ -11,7 +11,7 @@ class Geoformat{
 		return $str;
 	}
 	
-	public function sql2json($SQL, $shape_column, $popup_content=NULL){
+	public function sql2json($SQL, $shape_column, $popup_content=NULL, $label=NULL){
 		$CI =& get_instance();
 		require_once(APPPATH.'../modules/'.
 				$CI->cms_module_path('gofrendi.gis.core').
@@ -24,19 +24,23 @@ class Geoformat{
 			$json = $geom->out('json');
 			
 			$real_popup_content = "";
-			if(isset($popup_content)){
-				$search = array();
-				$replace = array();
-				foreach($row as $label=>$value){
-					$search[] = '@'.$label;
-					$replace[] = $value;
-				}
-				$real_popup_content = $this->replace($popup_content, $search, $replace);
+			$real_label = "";
+			$search = array();
+			$replace = array();
+			foreach($row as $column=>$value){
+				$search[] = '@'.$column;
+				$replace[] = $value;
 			}
+			if(isset($popup_content))
+				$real_popup_content = $this->replace($popup_content, $search, $replace);
+			if(isset($label))
+				$real_label = $this->replace($label, $search, $replace);
+				
 			$features[] = array(
 					"type" => "Feature",
 					"properties" => array(
 							"popupContent"=> $real_popup_content,
+							"label"=> $real_label,
 					),
 					"geometry" => json_decode($json),
 			);

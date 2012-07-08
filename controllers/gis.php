@@ -26,12 +26,62 @@ class gis extends CMS_Controller {
     	$this->load->Model($this->cms_module_path().'/Map_Model');
     	$this->load->library($this->cms_module_path().'/geoformat');
     	
-    	$data = $this->Map_Model->get_layer_json_parameter($layer_id);
-    	$SQL = $data["json_sql"];
-    	$popup_content = $data["json_popup_content"];
-    	$shape_column = $data["json_shape_column"];
+    	// get parameter from model
+    	$config = $this->Map_Model->get_layer_json_parameter($layer_id);
+    	$SQL = $config["json_sql"];
+    	$popup_content = $config["json_popup_content"];
+    	$label = $config["json_label"];
+    	$shape_column = $config["json_shape_column"];
     	
-    	echo $this->geoformat->sql2json($SQL, $shape_column, $popup_content);
+    	echo $this->geoformat->sql2json($SQL, $shape_column, $popup_content, $label);
+    }
+    
+    public function search($layer_id, $keyword=NULL){
+    	// get keyword
+    	if(!isset($keyword)){
+    		$keyword = $this->input->post('keyword');
+    	}
+    	$keyword = addslashes($keyword);
+    	
+    	// load model and library
+    	$this->load->Model($this->cms_module_path().'/Map_Model');
+    	$this->load->library($this->cms_module_path().'/geoformat');
+    	
+    	// get parameter from model
+    	$config = $this->Map_Model->get_layer_search_parameter($layer_id);
+    	$SQL = $config["search_sql"];
+    	$result_content = $config["search_result_content"];
+    	$long_column = $config["search_result_x_column"];
+    	$lat_column = $config["search_result_y_column"];
+    	
+    	// merge keyword into SQL
+    	$search = array('@keyword');
+    	$replace = array($keyword);
+    	$SQL = $this->geoformat->replace($SQL, $search, $replace);
+    	
+    	$data = array();
+    	$query = $this->db->query($SQL);
+    	foreach($query->result_array() as $row){
+    		// real result content
+    		$search = array();
+    		$replace = array();
+    		foreach($row as $label=>$value){
+    			$search[] = '@'.$label;
+    			$replace[] = $value;
+    		}
+    		$real_result_content = $this->geoformat->replace($result_content, $search, $replace);
+    		
+    		$real_lat_column = $row[$lat_column];
+    		$real_long_column = $row[$long_column];
+    		
+    		$data[] = array(
+    				"result_content" => $real_result_content,
+    				"latitude" => $real_lat_column,
+    				"longitude" => $real_long_column
+    			);
+    	}
+    	echo json_encode($data);
+    	
     }
 
     public function gis_map(){
@@ -71,19 +121,28 @@ class gis extends CMS_Controller {
 	    	->display_as('opacity','Style\'s Opacity')
 	    	->display_as('fill_opacity','Style\'s Fill Opacity')
 	    	->display_as('image_url','Style\'s Icon')
-	    	->display_as('json_sql','SQL')
-	    	->display_as('json_shape_column','Shape Column')
+	    	->display_as('json_sql','Spatial SQL')
+	    	->display_as('json_shape_column','Spatial Column')
 	    	->display_as('json_popup_content','Popup Content')
-	    	->display_as('use json_url','Use GeoJSON url to override')
+	    	->display_as('json_label','Label')
+	    	->display_as('use_json_url','Use GeoJSON url')
     		->display_as('json_url','GeoJSON url')
-	    	->display_as('display_feature_url','Display url')
-	    	->display_as('edit_feature_url','Editting url')
-    		->display_as('delete_feature_url','Deleting url');
+	    	->display_as('search_url','Search url')
+	    	->display_as('search_result_content','Search Result Content')
+    		->display_as('search_result_x_column','Search Longitude/x Column')
+    		->display_as('search_result_y_column','Search Latitude/y Column')
+    		->display_as('use_search_url','Use Search url')
+    		->display_as('searchable','Searchable')
+    		->display_as('search_sql','Search SQL');
     	$crud->set_relation('map_id', 'gis_map', 'map_name');
     	$crud->change_field_type('use_json_url', 'true_false');
+    	$crud->change_field_type('use_search_url', 'true_false');
     	$crud->change_field_type('shown', 'true_false');
+    	$crud->change_field_type('searchable', 'true_false');
     	$crud->unset_texteditor('json_sql');
     	$crud->unset_texteditor('json_popup_content');
+    	$crud->unset_texteditor('search_sql');
+    	$crud->unset_texteditor('search_result_content');
     	$output = $crud->render();
     	$this->view("grocery_CRUD", $output, "gis_layer");
     }

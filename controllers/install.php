@@ -74,11 +74,16 @@ class Install extends CMS_Module_Installer {
     		  `json_sql` text NULL,
     		  `json_shape_column` varchar(100) NULL,
     		  `json_popup_content` text NULL,
+    		  `json_label` text NULL,	
     		  `use_json_url` tinyint(4) NOT NULL DEFAULT '0',
 			  `json_url` varchar(100) NULL,
-			  `display_feature_url` varchar(100) NULL,
-			  `edit_feature_url` varchar(100) NULL,
-			  `delete_feature_url` varchar(100) NULL,			  
+    		  `searchable` tinyint(4) NOT NULL DEFAULT '0',			  
+    		  `search_sql` text NULL,
+			  `search_result_content` text NULL,
+			  `search_result_x_column` varchar(100) NULL,
+    		  `search_result_y_column` varchar(100) NULL,
+    		  `use_search_url` tinyint(4) NOT NULL DEFAULT '0',				  
+    		  `search_url` varchar(100) NULL,
 			  PRIMARY KEY (`layer_id`),
 			  KEY `map_id` (`map_id`),
     		  CONSTRAINT `gis_layer_ibfk_1` FOREIGN KEY (`map_id`) REFERENCES `gis_map` (`map_id`)
@@ -86,10 +91,10 @@ class Install extends CMS_Module_Installer {
     	");
     	
     	$this->db->query("
-	    	INSERT INTO `gis_layer` (`layer_id`, `map_id`, `layer_name`, `group_name`, `layer_desc`, `shown`, `radius`, `fill_color`, `color`, `weight`, `opacity`, `fill_opacity`, `image_url`, `json_sql`, `json_shape_column`, `json_popup_content`, `use_json_url`, `json_url`, `display_feature_url`, `edit_feature_url`, `delete_feature_url`) VALUES
-				(1, 1, 'All Airports', NULL, 'Airports in all alaska', 1, 4, '#ff7800', '#000000', 1, 1, 0.8, NULL, NULL, NULL, NULL, 1, '@site_urlgis/alaska_airport/geojson', NULL, NULL, NULL),
-				(2, 1, 'Civilian/Public', 'Airports by usage', 'Civilian/Public Airport', 0, 4, '#ff7800', '#000000', 1, 1, 0.8, '@base_url/modules/gis/assets/images/black_plane.png', 'SELECT `cat`, `name`, `use`, `elev`, astext(`shape`) as `shape`, x(`shape`) as `lat`, y(`shape`) as `long` \nFROM gis_alaska_airport \nWHERE `use`=\'Civilian/Public\' ;', 'shape', '<b>Civilian Airport</b><br />Name: @name<br />Latitude: @lat<br />Longitude:@long', 0, NULL, NULL, NULL, NULL),
-    			(3, 1, 'Military', 'Airports by usage', 'Military Airport', 0, 4, '#ff0000', '#000000', 1, 1, 0.8, NULL, 'SELECT `cat`, `name`, `use`, `elev`, astext(`shape`) as `shape`, x(`shape`) as `lat`, y(`shape`) as `long` \nFROM gis_alaska_airport \nWHERE `use`=\'Military\' ;', 'shape', '<b>Military Airport</b><br />@name<br />Latitude: @lat<br />Longitude:@long', 0, NULL, NULL, NULL, NULL);
+	    	INSERT INTO `gis_layer` (`layer_id`, `map_id`, `layer_name`, `group_name`, `layer_desc`, `shown`, `radius`, `fill_color`, `color`, `weight`, `opacity`, `fill_opacity`, `image_url`, `json_sql`, `json_shape_column`, `json_popup_content`, `json_label`, `use_json_url`, `json_url`, `searchable`, `search_sql`, `search_result_content`, `search_result_x_column`, `search_result_y_column`, `use_search_url`, `search_url`) VALUES
+				(1, 1, 'All Airports', '', 'Airports in all alaska', 1, 4, '#ff7800', '#000000', 1, 1, 0.8, NULL, NULL, NULL, NULL, NULL, 1, '@site_urlgis/alaska_airport/geojson', 1, 'SELECT `name`, `use`, `elev`, x(`shape`) as `x`, y(`shape`) as `y` \nFROM gis_alaska_airport\nWHERE name LIKE ''%@keyword%'';', '<b>@name</b><br />\nUsage : @use<br />\nElevation : @elev<br />\nCoordinate: (@x,@y)', 'x', 'y', 0, NULL),
+				(2, 1, 'Civilian/Public', 'Airports by usage', 'Civilian/Public Airport', 0, 4, '#ff7800', '#000000', 1, 1, 0.8, '@base_url/modules/gis/assets/images/black_plane.png', 'SELECT `cat`, `name`, `use`, `elev`, astext(`shape`) as `shape`, x(`shape`) as `lat`, y(`shape`) as `long` \nFROM gis_alaska_airport \nWHERE `use`=''Civilian/Public'' ;', 'shape', '<b>Civilian Airport</b><br />Name: @name<br />Latitude: @lat<br />Longitude:@long', '@name', 0, NULL, 0, NULL, NULL, NULL, NULL, 0, NULL),
+				(3, 1, 'Military', 'Airports by usage', 'Military Airport', 0, 4, '#ff0000', '#000000', 1, 1, 0.8, NULL, 'SELECT `cat`, `name`, `use`, `elev`, astext(`shape`) as `shape`, x(`shape`) as `lat`, y(`shape`) as `long` \nFROM gis_alaska_airport \nWHERE `use`=''Military'' ;', 'shape', '<b>Military Airport</b><br />@name<br />Latitude: @lat<br />Longitude:@long', '@name', 0, NULL, 0, NULL, NULL, NULL, NULL, 0, NULL);
     	");
     	
         $this->db->query("          

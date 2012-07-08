@@ -39,7 +39,8 @@ HOWTO:
                 // it is important to perform astext(your_geometry_field)
                 $SQL = "
                     SELECT `cat`, `name`, `use`, `elev`, astext(`shape`) as `shape` 
-                    FROM gis_alaska_airport";
+                    FROM gis_alaska_airport 
+                    WHERE `use`<>'Military' AND `use`<>'Civilian/Public'";
                     
                 // the geometry field of your query
                 $shape_column = 'shape';
@@ -53,8 +54,11 @@ HOWTO:
                 $popup_content .= ' Elevation : @elev<br />';
                 $popup_content .= '</p>';
                 
+                // label content
+                $label_content = '@name';
+                
                 // call sql2json function
-                echo $this->geoformat->sql2json($SQL, $shape_column, $popup_content);
+                echo $this->geoformat->sql2json($SQL, $shape_column, $popup_content, $label_content);
             }
 - Do some logic to be viewed in popup content
     - nope, you can't do that, costumize your query for such a purpose

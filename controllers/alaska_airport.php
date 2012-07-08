@@ -10,7 +10,8 @@ class Alaska_Airport extends CMS_Controller{
 		
 		$SQL = "
 			SELECT `cat`, `name`, `use`, `elev`, astext(`shape`) as `shape` 
-			FROM gis_alaska_airport";
+			FROM gis_alaska_airport 
+			WHERE `use`<>'Military' AND `use`<>'Civilian/Public'";
 		$shape_column = 'shape';
 		
 		$popup_content = '';
@@ -20,7 +21,9 @@ class Alaska_Airport extends CMS_Controller{
 		$popup_content .= ' Elevation : @elev<br />';
 		$popup_content .= '</p>';
 		
-		echo $this->geoformat->sql2json($SQL, $shape_column, $popup_content);
+		$label = '@name';
+		
+		echo $this->geoformat->sql2json($SQL, $shape_column, $popup_content, $label);
 	}
 	
 }
