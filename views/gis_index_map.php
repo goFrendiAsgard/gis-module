@@ -242,7 +242,8 @@
 
 
 			function fetchLayer(){
-				var bounds = map.getBounds();
+				var map_zoom = map.getZoom();
+				var bounds = map.getBounds();				
 				var southWest = bounds.getSouthWest();
 				var northEast = bounds.getNorthEast();
 				var map_region = 'POLYGON(('+
@@ -273,7 +274,8 @@
 						url : json_url,
 						type : 'POST',
 						data : {
-							map_region: map_region},
+							map_region: map_region,
+							map_zoom: map_zoom},
 						dataType : 'json',
 						error : function(response, textStatus, errorThrown){
 								$("#message").append("Failed to load <b>"+

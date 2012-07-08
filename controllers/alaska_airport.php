@@ -12,8 +12,8 @@ class Alaska_Airport extends CMS_Controller{
 			SELECT `cat`, `name`, `use`, `elev`, astext(`shape`) as `shape` 
 			FROM gis_alaska_airport 
 			WHERE 
-				(`use`<>'Military') AND (`use`<>'Civilian/Public') AND
-				MBRIntersects(`shape`,geomfromtext('@map_region'))=1";
+				(MBRIntersects(`shape`,geomfromtext('@map_region'))=1) AND
+				(@map_zoom > 3)";
 		$shape_column = 'shape';		
 		
 		$popup_content = '';

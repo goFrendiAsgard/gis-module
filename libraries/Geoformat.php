@@ -18,8 +18,9 @@ class Geoformat{
 				'/classes/geoPHP/geoPHP.inc');
 		
 		$map_region = $CI->input->post('map_region');
-		$search = array('@map_region');
-		$replace = array($map_region);
+		$map_zoom = $CI->input->post('map_zoom');
+		$search = array('@map_region', '@map_zoom');
+		$replace = array($map_region, $map_zoom);
 		$SQL = $this->replace($SQL, $search, $replace);
 		
 		$features = array();
