@@ -21,6 +21,14 @@
 	    	height: 10px;
 	    	width: 10px;
 	    }
+	    /*
+	    g>path{
+	    	z-index: 5;
+	    }
+	    g>path[d*="L"]{
+	    	z-index: -1;	    	
+	    }*/
+	    
 	</style>
 	<script type="text/javascript" src="<?php echo base_url(); ?>modules/<?php echo $cms["module_path"]; ?>/assets/js/leaflet/dist/leaflet.js"></script>
 	<?php
@@ -268,6 +276,7 @@
 
 					// get geoJSON from the server
 					$.ajax({
+						//async: false,
 						parse_data: {
 							layer: layer, 
 							group_name: group_name},
@@ -289,105 +298,121 @@
 								// make geojson layer
 								var point_config = null;							
 								var style = null;
-								var is_point = geojson_feature['features'][0]['geometry']['type']=='Point';
-								style = {
-										radius : layer['radius'],
-										fillColor: layer['fill_color'],
-										color: layer['color'],
-										weight: layer['weight'],
-										opacity: layer['opacity'],
-										fillOpacity: layer['fill_opacity']
-									};
-								
-								// if point
-								if(is_point){
-									if(layer['image_url']){
-										var image_url = layer['image_url'];
-										point_config = {
-												pointToLayer: function (latlng){
-											        return new L.Marker(latlng, {
-											            icon: new L.Icon({
-												            	iconUrl: image_url,
-																shadowUrl: null,
-																iconSize: new L.Point(20,20),//(32, 37),
-																shadowSize: null,
-																iconAnchor: new L.Point(14, 20),
-																popupAnchor: new L.Point(2, -20)
-												            })
-											        });
-											    }																			
-											};
-									}else{									
-										point_config = {
-											    pointToLayer: function (latlng) {
-											        return new L.CircleMarker(latlng, 
-													        style
-											        );
-											    },
-											}; 
-									}
-								}
-
-								geojson_layer = new L.GeoJSON(geojson_feature, point_config	);
-
-								geojson_layer.on("featureparse", function (e) {
-									// the popups
-									if (e.properties && e.properties.popupContent) {
-								        popupContent = e.properties.popupContent;
-								    }else{
-									    popupContent = '';
-								    }
-								    e.layer.bindPopup(popupContent);
-
-								    // the style (for point we need special treatment)
-								    if(!is_point){
-								    	e.layer.setStyle(style);
-								    }
-								    
-								});
-								
-								geojson_layer.addGeoJSON(geojson_feature);								
-
-								// add geojson layer to layer_groups	
-								layer_groups[group_name].addLayer(geojson_layer);
-
-								// label for point feature
-								if(is_point){
-									// for each point, we should make a more elegant way
-									for(var i=0; i<geojson_feature['features'].length; i++){
-										var geojson_single_feature = {
-												"type":"FeatureCollection",
-												"features":[geojson_feature['features'][i]]
+								if(geojson_feature['features'].length>0){
+									var feature_type = geojson_feature['features'][0]['geometry']['type'];
+									var is_point = (feature_type=='Point');
+									// style
+									style = {
+											radius : layer['radius'],
+											fillColor: layer['fill_color'],
+											color: layer['color'],
+											weight: layer['weight'],
+											opacity: layer['opacity'],
+											fillOpacity: layer['fill_opacity']
+										};
+									
+									// if point
+									if(is_point){
+										if(layer['image_url']){
+											var image_url = layer['image_url'];
+											point_config = {
+													pointToLayer: function (latlng){
+												        return new L.Marker(latlng, {
+												            icon: new L.Icon({
+													            	iconUrl: image_url,
+																	shadowUrl: null,
+																	iconSize: new L.Point(20,20),//(32, 37),
+																	shadowSize: null,
+																	iconAnchor: new L.Point(14, 20),
+																	popupAnchor: new L.Point(2, -20)
+													            })
+												        });
+												    }																			
+												};
+										}else{									
+											point_config = {
+												    pointToLayer: function (latlng) {
+												        return new L.CircleMarker(latlng, 
+														        style
+												        );
+												    },
+												}; 
 										}
-										var label = geojson_feature['features'][i]['properties']['label']
-										var point_config = {
-												pointToLayer: function (latlng){
-											        return new L.Marker(latlng,{
-											            icon: new L.Icon.Text(label,{})
-											        });
-											    }																			
-											};
-										var geojson_label = new L.GeoJSON(geojson_single_feature, point_config	);
-										geojson_label.on("featureparse", function (e) {
-											// the popups
-											if (e.properties && e.properties.popupContent) {
-										        popupContent = e.properties.popupContent;
-										    }else{
-											    popupContent = '';
-										    }
-										    e.layer.bindPopup(popupContent);	
-										    // the style (for point we need special treatment)
-										    if(!is_point){
-										    	e.layer.setStyle(style);
-										    }
-										    
-										});
-										
-										geojson_label.addGeoJSON(geojson_single_feature);
-		
-										// add geojso_label to layer_group
-										layer_groups[group_name].addLayer(geojson_label);
 									}
+
+									var geojson_layer = null;
+									if(is_point){
+										geojson_layer = new L.GeoJSON(geojson_feature, point_config	);
+									}else{
+										geojson_layer = new L.GeoJSON(geojson_feature);
+									}
+									
+									geojson_layer.on("featureparse", function (e) {
+										// the popups
+										if (e.properties && e.properties.popupContent) {
+									        popupContent = e.properties.popupContent;
+									    }else{
+										    popupContent = '';
+									    }
+									    e.layer.bindPopup(popupContent);
+	
+									    // the style (for point we need special treatment)
+									    if(!is_point){
+									    	e.layer.setStyle(style);
+									    }
+									    
+									});
+									
+									geojson_layer.addGeoJSON(geojson_feature);								
+	
+									// add geojson layer to layer_groups	
+									layer_groups[group_name].addLayer(geojson_layer);
+	
+									// label for point feature
+									if(is_point){
+										// for each point, we should make a more elegant way
+										for(var i=0; i<geojson_feature['features'].length; i++){
+											var geojson_single_feature = {
+													"type":"FeatureCollection",
+													"features":[geojson_feature['features'][i]]
+											}
+											var label = geojson_feature['features'][i]['properties']['label']
+											var point_config = {
+													pointToLayer: function (latlng){
+												        return new L.Marker(latlng,{
+												            icon: new L.Icon.Text(label,{})
+												        });
+												    }																			
+												};
+											var geojson_label = new L.GeoJSON(geojson_single_feature, point_config	);
+											geojson_label.on("featureparse", function (e) {
+												// the popups
+												if (e.properties && e.properties.popupContent) {
+											        popupContent = e.properties.popupContent;
+											    }else{
+												    popupContent = '';
+											    }
+											    e.layer.bindPopup(popupContent);	
+											    // the style (for point we need special treatment)
+											    if(!is_point){
+											    	e.layer.setStyle(style);
+											    }
+											    
+											});
+											
+											geojson_label.addGeoJSON(geojson_single_feature);
+			
+											// add geojson_label to layer_group
+											layer_groups[group_name].addLayer(geojson_label);
+										}
+									}
+
+									// TODO: make a better approach
+									var child = $('svg>g>path[d*="L"]');
+									child.remove();
+									$('svg').prepend(child);
+
+									
 								}
 												
 							}
