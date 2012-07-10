@@ -21,13 +21,6 @@
 	    	height: 10px;
 	    	width: 10px;
 	    }
-	    /*
-	    g>path{
-	    	z-index: 5;
-	    }
-	    g>path[d*="L"]{
-	    	z-index: -1;	    	
-	    }*/
 	    
 	</style>
 	<script type="text/javascript" src="<?php echo base_url(); ?>modules/<?php echo $cms["module_path"]; ?>/assets/js/leaflet/dist/leaflet.js"></script>
@@ -107,12 +100,13 @@
 
 			var google_roadmap_caption = 'Google Roadmap';
 			var google_satellite_caption = 'Google Satellite';
-			var google_hybrid_caption = 'Google Hybrid';
+			var google_hybrid_caption = 'Google Hybrid';		
 			
-			var shown_layers = new Array();
 			
 			// render the base maps and default_shown_base_map
 			var baseMaps = new Object();
+			var baseMapExists = false;
+			var selectedBaseMap = null;
 			for (var i =0; i<map_cloudmade.length; i++){
 				cloudmade = map_cloudmade[i];
 				cloudmade_attribution = cloudmade["attribution"];
@@ -121,59 +115,69 @@
 				cloudmade_max_zoom = cloudmade["max_zoom"];
 				cloudmade_options = {maxZoom: cloudmade_max_zoom, attribution: cloudmade_attribution};
 				baseMaps[cloudmade_name] = new L.TileLayer(cloudmade_url, cloudmade_options);
-				if(shown_layers.length == 0) shown_layers[0] = baseMaps[cloudmade_name];
+				if(!baseMapExists){
+					selectedBaseMap = baseMaps[cloudmade_name];
+					baseMapExists = true;
+				}
 			}
 			try{
 				if(map_gmap_roadmap){
 					baseMaps[google_roadmap_caption] = new L.Google('ROADMAP');
-					if(shown_layers.length == 0) shown_layers[0] = baseMaps[google_roadmap_caption];
-					shown_layers[shown_layers.length] = baseMaps[google_roadmap_caption];
+					if(!baseMapExists){
+						selectedBaseMap = baseMaps[google_roadmap_caption];
+						baseMapExists = true;
+					}
 				}
 				if(map_gmap_satellite){
 					baseMaps[google_satellite_caption] = new L.Google('SATELLITE');
-					if(shown_layers.length == 0) shown_layers[0] = baseMaps[google_satellite_caption];
+					if(!baseMapExists){
+						selectedBaseMap = baseMaps[google_satellite_caption];
+						baseMapExists = true;
+					}
 				}
 				if(map_gmap_hybrid){
 					baseMaps[google_hybrid_caption] = new L.Google('HYBRID');
-					if(shown_layers.length == 0) shown_layers[0] = baseMaps[google_hybrid_caption];
+					if(!baseMapExists){
+						selectedBaseMap = baseMaps[google_hybrid_caption];
+						baseMapExists = true;
+					}
 				}
 			}catch(err){
 				$("div#message").append('Cannot create google maps');	
 			}
 			
 			
-
+			// get layer groups
 			var layer_groups = new Object();
 			var layer_group_indexes = new Object();
 			var overlayMaps = new Object();
+			var shown_overlayMaps = new Object();
 			for(var i=0; i<map_layer_groups.length; i++){
 				group = map_layer_groups[i];				
 				label = group['name'];
 				shown = group['shown'];
-				layer_groups[label] = new L.GeoJSON();
+				layer_groups[label] = new L.LayerGroup();
 				if(shown>0){
-					shown_layers[shown_layers.length] = layer_groups[label];				
+					shown_overlayMaps[label] = layer_groups[label];				
 		    	}
 				overlayMaps[label] = layer_groups[label];
 				layer_group_indexes[label] = i+1;
 			}
-	
-			
 
 			// define map parameter
 			var map = new L.Map('map', {
 				center: new L.LatLng(map_latitude, map_longitude), zoom: map_zoom,
 			});
-			// add shown layers to the map
-			for(var i=0; i<shown_layers.length; i++){
-				map.addLayer(shown_layers[i]);
+			map.addLayer(selectedBaseMap);
+			for(key in overlayMaps){
+				map.addLayer(overlayMaps[key]);
 			}
-			
 
-			// add layer control, so that user can adjust the visibility of the layers
-			layersControl = new L.Control.Layers(baseMaps, overlayMaps);
+			// add layer control, so that user can adjust the visibility of the layers			
+			layersControl = new L.Control.Layers(baseMaps, overlayMaps, {'collapsed':false});			
 			map.addControl(layersControl);
 			
+
 			// jquery css hack to show the legends
 			for(var i=0; i<map_layers.length; i++){
 				var layer = map_layers[i];
@@ -194,7 +198,12 @@
 				}else{
 					$(div_identifier).css({'background-color': layer['fill_color']});
 				}
-			}
+
+				if(!(group_name in shown_overlayMaps)){
+					var checkbox_identifier = label_identifier+'>input';
+					$(checkbox_identifier).attr('checked', false);
+				}
+			}// end of jquery css hack
 
 			fetchLayer();
 
@@ -240,7 +249,8 @@
 				var latitude = $(this).parent().children('.result_latitude').val();
 				var newLocation = new L.LatLng(latitude, longitude);
 		        // teleport
-		        map.setView(newLocation, 20);
+		        map.panTo(newLocation);
+		        map.setZoom(20);
 				return false;
 			});
 
@@ -267,13 +277,13 @@
 					group_name = group['name'];				
 					layer_groups[group_name].clearLayers();
 				}
+				
 				// add layers to the groups
 				for(var i=0; i<map_layers.length; i++){
 					var layer = map_layers[i];
 					var group_name = layer["group_name"];
-					var json_url = layer["json_url"];	
+					var json_url = layer["json_url"];
 					
-
 					// get geoJSON from the server
 					$.ajax({
 						//async: false,
@@ -406,12 +416,21 @@
 											layer_groups[group_name].addLayer(geojson_label);
 										}
 									}
-
-									// TODO: make a better approach
-									var child = $('svg>g>path[d*="L"]');
-									child.remove();
-									$('svg').prepend(child);
-
+																		
+									// remove all layer group add them in reverse order to maintain z-index
+									var keys=new Array();
+									
+									for(key in layer_groups){
+										if(map.hasLayer(layer_groups[key])){
+											map.removeLayer(layer_groups[key]);
+											keys[keys.length] = key;
+										}
+									}
+									for(var i=keys.length-1; i>=0; i--){
+										group = map_layer_groups;
+										map.addLayer(layer_groups[keys[i]]);
+									}
+									
 									
 								}
 												
@@ -419,7 +438,7 @@
 					});
 
 					
-				}// end of AJAX call
+				}// end for add layers to group
 			}// end of function fetchLayer
 			
 		

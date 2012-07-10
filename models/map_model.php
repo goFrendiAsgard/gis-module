@@ -42,11 +42,12 @@
 		
 		public function get_layer($map_id){
 			$SQL = "SELECT layer_id, layer_name, layer_desc,
-					IF(group_name='' OR group_name iS NULL, layer_name, group_name) AS group_name,
-	    		    shown, radius, fill_color, color, weight,
-				    opacity, fill_opacity, image_url, use_json_url,
-				    json_url, search_url, use_search_url, searchable
-				    FROM gis_layer WHERE map_id = '".addslashes($map_id)."'";
+						IF(group_name='' OR group_name iS NULL, layer_name, group_name) AS group_name,
+		    		    shown, radius, fill_color, color, weight,
+					    opacity, fill_opacity, image_url, use_json_url,
+					    json_url, search_url, use_search_url, searchable
+				    FROM gis_layer WHERE map_id = '".addslashes($map_id)."'
+					ORDER BY layer_id";
 			$query = $this->db->query($SQL);
 			$data = array();
 			foreach($query->result_array() as $row){
