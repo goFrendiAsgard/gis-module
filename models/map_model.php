@@ -8,7 +8,6 @@
 				if($query->num_rows()>0){
 					$row = $query->row_array();
 					$row['layer_groups'] = $this->get_layer_group($map_id);
-					$row['layers'] = $this->get_layer($map_id);
 					$row['cloudmade_basemap'] = $this->get_cloudmade_basemap($map_id);
 					return $row;
 				}else{
@@ -27,27 +26,33 @@
 		
 		public function get_layer_group($map_id){
 			$SQL = "SELECT 
-					DISTINCT(IF(group_name='' OR group_name iS NULL, layer_name, group_name)) AS name, 
-					COUNT(layer_name) AS layer_count,
+					DISTINCT(IF(group_name='' OR group_name iS NULL, layer_name, group_name)) AS name,
 					MAX(shown) AS shown
-				FROM gis_layer WHERE map_id = '".addslashes($map_id)."'				
+				FROM gis_layer 
+				WHERE map_id = '".addslashes($map_id)."'				
 				GROUP BY name
 				ORDER BY MIN(z_index), MIN(layer_id)";
 			$query = $this->db->query($SQL);
 			$data = array();
-			foreach($query->result_array() as $row){				
+			foreach($query->result_array() as $row){
+				$row['group_name'] = $row['name'];
+				unset($row['name']);
+				$row['layers'] = $this->get_layer($map_id, $row['group_name']);				
 				$data[] = $row;
 			}
 			return $data;			
 		}
 		
-		public function get_layer($map_id){
+		public function get_layer($map_id, $group_name){
 			$SQL = "SELECT layer_id, layer_name, layer_desc,
 						IF(group_name='' OR group_name iS NULL, layer_name, group_name) AS group_name,
 		    		    shown, radius, fill_color, color, weight,
 					    opacity, fill_opacity, image_url, use_json_url,
 					    json_url, search_url, use_search_url, searchable
-				    FROM gis_layer WHERE map_id = '".addslashes($map_id)."'
+				    FROM gis_layer 
+				    WHERE 
+				    	map_id = '".addslashes($map_id)."' AND 
+				    	IF(group_name='' OR group_name iS NULL, layer_name, group_name) = '".addslashes($group_name)."'
 					ORDER BY z_index, layer_id";
 			$query = $this->db->query($SQL);
 			$data = array();
