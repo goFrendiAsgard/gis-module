@@ -113,6 +113,7 @@ class gis extends CMS_Controller {
     	$crud->display_as('map_id','Map Name')
 	    	->display_as('layer_name','Layer Name')
 	    	->display_as('layer_desc','Description')
+	    	->display_as('z_index', 'Z Index')
 	    	->display_as('shown','Shown On Startup')
 	    	->display_as('radius','Style\'s Radius')
 	    	->display_as('fill_color','Style\'s Fill Color')

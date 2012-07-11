@@ -28,10 +28,11 @@
 		public function get_layer_group($map_id){
 			$SQL = "SELECT 
 					DISTINCT(IF(group_name='' OR group_name iS NULL, layer_name, group_name)) AS name, 
+					COUNT(layer_name) AS layer_count,
 					MAX(shown) AS shown
 				FROM gis_layer WHERE map_id = '".addslashes($map_id)."'				
 				GROUP BY name
-				ORDER BY MIN(layer_id)";
+				ORDER BY MIN(z_index), MIN(layer_id)";
 			$query = $this->db->query($SQL);
 			$data = array();
 			foreach($query->result_array() as $row){				
@@ -47,7 +48,7 @@
 					    opacity, fill_opacity, image_url, use_json_url,
 					    json_url, search_url, use_search_url, searchable
 				    FROM gis_layer WHERE map_id = '".addslashes($map_id)."'
-					ORDER BY layer_id";
+					ORDER BY z_index, layer_id";
 			$query = $this->db->query($SQL);
 			$data = array();
 			foreach($query->result_array() as $row){

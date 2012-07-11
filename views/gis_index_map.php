@@ -11,15 +11,22 @@
 	    .layer_legend{
 	    	list-style-type: none;
 	    }
-	    .layer_legend div{
-	    	margin: 2px;
+	    .layer_legend>div, .leaflet-control-layers-overlays>label>div{
+	    	margin-left: 5px;
+	    	margin-right: 5px;
 	    	width: 10px;
 	    	height: 10px;
 	    	display: inline-block;
 	    }
-	    .layer_legend div img{
+	    .layer_legend>div>img, .leaflet-control-layers-overlays>label>div>img{
+	    	height: 15px;
+	    	width: 15px;
+	    }
+	    .layer_legend>div>div, .leaflet-control-layers-overlays>label>div>div{
 	    	height: 10px;
 	    	width: 10px;
+	    	border-radius:5px;
+	    	-moz-border-radius:5px;
 	    }
 	    
 	</style>
@@ -166,7 +173,7 @@
 
 			// define map parameter
 			var map = new L.Map('map', {
-				center: new L.LatLng(map_latitude, map_longitude), zoom: map_zoom,
+				center: new L.LatLng(map_latitude, map_longitude), zoom: map_zoom, maxZoom:30
 			});
 			map.addLayer(selectedBaseMap);
 			for(key in overlayMaps){
@@ -179,6 +186,20 @@
 			
 
 			// jquery css hack to show the legends
+			for(var i=0; i<map_layer_groups.length; i++){
+				var group = map_layer_groups[i];				
+				var group_name = group['name'];
+				var layer_count = group['layer_count'];
+				// css hack to modify to legends
+				var label_index = layer_group_indexes[group_name];
+				var label_identifier = '.leaflet-control-layers-overlays label:nth-child('+label_index+')';
+				if (layer_count > 1){
+					$(label_identifier).append('<ul></ul>');
+				}else{
+					var checkbox_identifier = label_identifier+'>input';
+					$(checkbox_identifier).after('<div></div>');
+				}				
+			}
 			for(var i=0; i<map_layers.length; i++){
 				var layer = map_layers[i];
 				var layer_name = layer["layer_name"];
@@ -189,19 +210,28 @@
 				var label_identifier = '.leaflet-control-layers-overlays label:nth-child('+label_index+')';
 				var ul_identifier = label_identifier+' ul';
 				if ($(ul_identifier).length == 0){
-					$(label_identifier).append('<ul></ul>');
-				}
-				$(ul_identifier).append('<li id="layer_'+i+'" class="layer_legend"><div></div>'+layer_name+'</li>');
-				var div_identifier = ul_identifier+' li#layer_'+i+' div';
-				if(layer['image_url']!=''){
-					$(div_identifier).html('<img src="'+layer['image_url']+'" />');
+					var div_identifier = label_identifier+' div';
+					if(layer['image_url']!=''){
+						$(div_identifier).html('<img src="'+layer['image_url']+'" />');
+					}else{
+						$(div_identifier).html('<div></div>');
+						$(div_identifier+'>div').css({'background-color': layer['fill_color'], 'border-color':layer['color']});
+					}
 				}else{
-					$(div_identifier).css({'background-color': layer['fill_color']});
+					$(ul_identifier).append('<li id="layer_'+i+'" class="layer_legend"><div></div>'+layer_name+'</li>');
+					var div_identifier = ul_identifier+' li#layer_'+i+' div';
+					if(layer['image_url']!=''){
+						$(div_identifier).html('<img src="'+layer['image_url']+'" />');
+					}else{
+						$(div_identifier).html('<div></div>');
+						$(div_identifier+'>div').css({'background-color': layer['fill_color'], 'border-color':layer['color']});
+					}
 				}
 
 				if(!(group_name in shown_overlayMaps)){
 					var checkbox_identifier = label_identifier+'>input';
 					$(checkbox_identifier).attr('checked', false);
+					map.removeLayer(overlayMaps[group_name]);
 				}
 			}// end of jquery css hack
 
@@ -302,6 +332,7 @@
 										textStatus+'</b>, '+errorThrown+'<br />');
 							},
 						success : function(response){
+								// console.log(response,'Geo JSON From '+this.parse_data.layer['layer_name']);
 								layer = this.parse_data.layer;
 								group_name = this.parse_data.group_name;
 								geojson_feature = response;	
@@ -310,7 +341,10 @@
 								var style = null;
 								if(geojson_feature['features'].length>0){
 									var feature_type = geojson_feature['features'][0]['geometry']['type'];
-									var is_point = (feature_type=='Point');
+									feature_type = feature_type.toUpperCase();
+									var is_point = (feature_type=='POINT');
+									var is_linestring = (feature_type=='LINESTRING');
+									var is_polygon = (feature_type=='POLYGON');
 									// style
 									style = {
 											radius : layer['radius'],
@@ -333,7 +367,7 @@
 																	shadowUrl: null,
 																	iconSize: new L.Point(20,20),//(32, 37),
 																	shadowSize: null,
-																	iconAnchor: new L.Point(14, 20),
+																	iconAnchor: new L.Point(10, 10),
 																	popupAnchor: new L.Point(2, -20)
 													            })
 												        });
@@ -378,14 +412,44 @@
 									// add geojson layer to layer_groups	
 									layer_groups[group_name].addLayer(geojson_layer);
 	
-									// label for point feature
-									if(is_point){
+									// labels
+									if(is_point || is_polygon || is_linestring){
 										// for each point, we should make a more elegant way
 										for(var i=0; i<geojson_feature['features'].length; i++){
-											var geojson_single_feature = {
-													"type":"FeatureCollection",
-													"features":[geojson_feature['features'][i]]
+											var geojson_single_feature = new Object();
+											if(is_point){
+												geojson_single_feature = {
+														"type":"FeatureCollection",
+														"features":[geojson_feature['features'][i]]
+													};
+											}else if(is_linestring){
+												var original_feature = geojson_feature['features'][i];
+												geojson_single_feature = {
+														"type":"FeatureCollection",
+														"features":[{
+																"type": "Feature",
+																"properties": original_feature['properties'],
+																"geometry":{
+																		"type": "Point",
+																		"coordinates": original_feature['geometry']['coordinates'][0]
+																	}
+															}]
+													};
+											}else if(is_polygon){
+												var original_feature = geojson_feature['features'][i];
+												geojson_single_feature = {
+														"type":"FeatureCollection",
+														"features":[{
+																"type": "Feature",
+																"properties": original_feature['properties'],
+																"geometry":{
+																		"type": "Point",
+																		"coordinates": original_feature['geometry']['coordinates'][0][0]
+																	}
+															}]
+													};
 											}
+											
 											var label = geojson_feature['features'][i]['properties']['label']
 											var point_config = {
 													pointToLayer: function (latlng){
@@ -394,6 +458,9 @@
 												        });
 												    }																			
 												};
+
+											// console.log(geojson_single_feature,'- feature for label '+label);
+											
 											var geojson_label = new L.GeoJSON(geojson_single_feature, point_config	);
 											geojson_label.on("featureparse", function (e) {
 												// the popups
@@ -402,11 +469,7 @@
 											    }else{
 												    popupContent = '';
 											    }
-											    e.layer.bindPopup(popupContent);	
-											    // the style (for point we need special treatment)
-											    if(!is_point){
-											    	e.layer.setStyle(style);
-											    }
+											    e.layer.bindPopup(popupContent);
 											    
 											});
 											
@@ -476,4 +539,5 @@
 			echo '<div id="gis_search_result"></div>';
 		}
 	?>
+	<pre><?php //echo var_dump($map);?></pre>
 </body>

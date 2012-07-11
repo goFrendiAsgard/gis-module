@@ -63,6 +63,7 @@ class Install extends CMS_Module_Installer {
 			  `layer_name` varchar(45) NOT NULL,
     		  `group_name` varchar(45) NOT NULL,
 			  `layer_desc` varchar(45) DEFAULT NULL,
+    		  `z_index` tinyint(4) NOT NULL DEFAULT '0',
     		  `shown` tinyint(4) NOT NULL DEFAULT '1',
 			  `radius` int(11) NOT NULL DEFAULT '8',
 			  `fill_color` varchar(45) NOT NULL DEFAULT '#FF7800',
