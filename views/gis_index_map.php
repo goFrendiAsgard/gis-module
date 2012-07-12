@@ -137,7 +137,9 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 				zoom: map_zoom, 
 				maxZoom: max_zoom,
 			});
-			map.addLayer(selectedBaseMap);
+			if(baseMapExists){
+				map.addLayer(selectedBaseMap);
+			}
 			for(key in overlayMaps){
 				map.addLayer(overlayMaps[key]);
 			}
