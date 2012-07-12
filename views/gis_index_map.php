@@ -1,6 +1,9 @@
+<?php 
+$CI =& get_instance();
+$gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 <head>
-	<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>modules/<?php echo $cms["module_path"]; ?>/assets/js/leaflet/dist/leaflet.css" />
-	<!--[if lte IE 8]><link rel="stylesheet" href="<?php echo base_url(); ?>modules/<?php echo $cms["module_path"]; ?>/assets/js/leaflet/dist/leaflet.ie.css" /><![endif]-->
+	<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>modules/<?php echo $gis_path; ?>/assets/js/leaflet/dist/leaflet.css" />
+	<!--[if lte IE 8]><link rel="stylesheet" href="<?php echo base_url(); ?>modules/<?php echo $gis_path; ?>/assets/js/leaflet/dist/leaflet.ie.css" /><![endif]-->
 	<style type="text/css">
 	    .leaflet-container img{
 	        z-index : -1;
@@ -31,16 +34,16 @@
 	    }
 	    
 	</style>
-	<script type="text/javascript" src="<?php echo base_url(); ?>modules/<?php echo $cms["module_path"]; ?>/assets/js/leaflet/dist/leaflet.js"></script>
-	<script type="text/javascript" src="<?php echo base_url(); ?>modules/<?php echo $cms["module_path"]; ?>/assets/js/leaflet-label/Label.js"></script>
+	<script type="text/javascript" src="<?php echo base_url(); ?>modules/<?php echo $gis_path; ?>/assets/js/leaflet/dist/leaflet.js"></script>
+	<script type="text/javascript" src="<?php echo base_url(); ?>modules/<?php echo $gis_path; ?>/assets/js/leaflet-label/Label.js"></script>
 	<?php
 	// only load google's stuff if needed
 	if ($map["gmap_roadmap"] || $map["gmap_satellite"] || $map["gmap_hybrid"]){	
 		echo '<script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>';
-		echo '<script type="text/javascript" src="'.base_url().'modules/'.$cms["module_path"].'/assets/js/leaflet-google/Google.js"></script>';
+		echo '<script type="text/javascript" src="'.base_url().'modules/'.$gis_path.'/assets/js/leaflet-google/Google.js"></script>';
 	}
 	?>	
-	<script type="text/javascript" src="<?php echo base_url(); ?>modules/<?php echo $cms["module_path"]; ?>/assets/js/jquery/jquery-1.7.2.min.js"></script>
+	<script type="text/javascript" src="<?php echo base_url(); ?>modules/<?php echo $gis_path; ?>/assets/js/jquery/jquery-1.7.2.min.js"></script>
 	<script type="text/javascript">
 		// variables from php
 		var map_longitude = <?php echo $map["longitude"]; ?>;
@@ -226,7 +229,7 @@
 												html += '<div class="result_content">'+data.result_content+'</div>';
 												html += '<input class="result_longitude" type="hidden" value="'+data.longitude+'" />';
 												html += '<input class="result_latitude" type="hidden" value="'+data.latitude+'" />';
-												html += '<a class="result_link" href="<?php echo site_url($cms["module_path"].'/index/'.$map["map_id"]);?>/'+											
+												html += '<a class="result_link" href="<?php echo site_url($gis_path.'/index/'.$map["map_id"]);?>/'+											
 													data.longitude+'/'+data.latitude+'">Go To Location</a>';
 												html += '<div>';
 												$('#gis_search_result').append(html);
@@ -518,5 +521,4 @@
 			echo '<div id="gis_search_result"></div>';
 		}
 	?>
-	<!-- <pre><?php echo var_dump($map);?></pre>  -->
 </body>
