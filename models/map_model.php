@@ -7,6 +7,7 @@
 				$query = $this->db->query($SQL);
 				if($query->num_rows()>0){
 					$row = $query->row_array();
+					$row['scripts'] = array();
 					$row['layer_groups'] = $this->get_layer_group($map_id);
 					$row['cloudmade_basemap'] = $this->get_cloudmade_basemap($map_id);
 					return $row;
@@ -18,6 +19,7 @@
 				$query = $this->db->query($SQL);
 				$data = array();
 				foreach($query->result_array() as $row){
+					$row["scripts"] = array();
 					$data[] = $row;
 				}
 				return $data;

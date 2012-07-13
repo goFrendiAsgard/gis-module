@@ -42,6 +42,9 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 		echo '<script type="text/javascript" src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>';
 		echo '<script type="text/javascript" src="'.base_url().'modules/'.$gis_path.'/assets/js/leaflet-google/Google.js"></script>';
 	}
+	for($i=0; $i<count($map["scripts"]); $i++){
+		echo '<script type="text/javscript" src="'.$map["scripts"][$i].'"></script>';
+	}
 	?>	
 	<script type="text/javascript" src="<?php echo base_url(); ?>modules/<?php echo $gis_path; ?>/assets/js/jquery/jquery-1.7.2.min.js"></script>
 	<script type="text/javascript">
@@ -172,7 +175,14 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 							$(div_identifier).html('<img src="'+layer['image_url']+'" />');
 						}else{
 							$(div_identifier).html('<div></div>');
-							$(div_identifier+'>div').css({'background-color': layer['fill_color'], 'border-color':layer['color']});
+							$(div_identifier+'>div').css({
+								'background-color': layer['fill_color'], 
+								'border-color':layer['color'], 
+								'width':layer['radius'],
+								'height':layer['radius'],
+								'border-radius':Math.ceil(layer['radius']/2),
+								'-moz-border-radius':Math.ceil(layer['radius']/2),
+							});
 						}
 					}										
 				}else{
@@ -186,7 +196,14 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 						$(div_identifier).html('<img src="'+layer['image_url']+'" />');
 					}else{
 						$(div_identifier).html('<div></div>');
-						$(div_identifier+'>div').css({'background-color': layer['fill_color'], 'border-color':layer['color']});
+						$(div_identifier+'>div').css({
+							'background-color': layer['fill_color'], 
+							'border-color':layer['color'], 
+							'width':layer['radius'],
+							'height':layer['radius'],
+							'border-radius':Math.ceil(layer['radius']/2),
+							'-moz-border-radius':Math.ceil(layer['radius']/2),
+						});
 					}
 				}
 				// uncheck and remove layer group which is not shown by default
@@ -195,6 +212,18 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 					$(checkbox_identifier).attr('checked', false);
 					map.removeLayer(overlayMaps[group_name]);
 				}				
+
+				// control height
+				var map_identifier = "#map";
+				var control_identifier = ".leaflet-control-layers";
+				var map_height = $(map_identifier).height();
+				var control_height = $(control_identifier).height();
+				var control_width = $(control_identifier).width();
+				if(control_height>map_height-50){
+					$(control_identifier).height(map_height-50);
+					$(control_identifier).width(control_width+20);
+				}
+				$(control_identifier).css('overflow', 'auto');
 			}// end of jquery css hack
 
 			// fetch the layers
