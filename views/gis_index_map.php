@@ -17,20 +17,21 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 	    .layer_legend>div, .leaflet-control-layers-overlays>label>div{
 	    	margin-left: 5px;
 	    	margin-right: 5px;
-	    	width: 10px;
-	    	height: 10px;
+	    	width: 20px;
+	    	height: 20px;	    	
 	    	display: inline-block;
-	    }
-	    .layer_legend>div>img, .leaflet-control-layers-overlays>label>div>img{
-	    	height: 15px;
-	    	width: 15px;
+	    	vertical-align: middle;
 	    }
 	    .layer_legend>div>div, .leaflet-control-layers-overlays>label>div>div{
-	    	height: 10px;
-	    	width: 10px;
+	    	max-height: 20px;
+	    	max-width: 20px;
 	    	border-radius:5px;
 	    	-moz-border-radius:5px;
 	    	border: 1px solid;
+	    }
+	    .layer_legend>div>img, .leaflet-control-layers-overlays>label>div>img{
+	    	max-height: 20px;
+	    	max-width: 20px;
 	    }
 	    
 	</style>
@@ -173,6 +174,12 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 						// add image or symbol
 						if(layer['image_url']!=''){
 							$(div_identifier).html('<img src="'+layer['image_url']+'" />');
+							$(div_identifier+'>img').css({
+								'width':layer['radius'],
+								'height':layer['radius'],
+								'margin-top': 10-Math.ceil(layer['radius']/2),
+								'margin-left': 10-Math.ceil(layer['radius']/2),
+							});
 						}else{
 							$(div_identifier).html('<div></div>');
 							$(div_identifier+'>div').css({
@@ -182,6 +189,8 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 								'height':layer['radius'],
 								'border-radius':Math.ceil(layer['radius']/2),
 								'-moz-border-radius':Math.ceil(layer['radius']/2),
+								'margin-top': 10-Math.ceil(layer['radius']/2),
+								'margin-left': 10-Math.ceil(layer['radius']/2),
 							});
 						}
 					}										
@@ -192,8 +201,15 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 					// add div after checkbox
 					$(checkbox_identifier).after('<div></div>');			
 					// add image or symbol
+					// add image or symbol
 					if(layer['image_url']!=''){
 						$(div_identifier).html('<img src="'+layer['image_url']+'" />');
+						$(div_identifier+'>img').css({
+							'width':layer['radius'],
+							'height':layer['radius'],
+							'margin-top': 10-Math.ceil(layer['radius']/2),
+							'margin-left': 10-Math.ceil(layer['radius']/2),
+						});
 					}else{
 						$(div_identifier).html('<div></div>');
 						$(div_identifier+'>div').css({
@@ -203,6 +219,8 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 							'height':layer['radius'],
 							'border-radius':Math.ceil(layer['radius']/2),
 							'-moz-border-radius':Math.ceil(layer['radius']/2),
+							'margin-top': 10-Math.ceil(layer['radius']/2),
+							'margin-left': 10-Math.ceil(layer['radius']/2),
 						});
 					}
 				}
@@ -244,7 +262,7 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 						if(searchable){
 							layer_name = layer["layer_name"];
 							if($('#gis_search_layer_'+i+'_'+j).attr('checked')){
-								console.log('checked');
+								//console.log('checked');
 								var search_url = layer["search_url"];
 								$.ajax({
 									url: search_url,
@@ -252,7 +270,7 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 									type: 'POST',
 									dataType: 'json',
 									success: function(response){
-											console.log(response);
+											//console.log(response);
 											for(var j=0; j<response.length; j++){
 												var data = response[j];
 												var html = '';
@@ -331,6 +349,7 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 											textStatus+'</b>, '+errorThrown+'<br />');
 								},
 							success : function(response){
+									//console.log(response);
 									// console.log(response,'Geo JSON From '+this.parse_data.layer['layer_name']);
 									layer = this.parse_data.layer;
 									group_name = this.parse_data.group_name;
@@ -351,7 +370,8 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 												color: layer['color'],
 												weight: layer['weight'],
 												opacity: layer['opacity'],
-												fillOpacity: layer['fill_opacity']
+												fillOpacity: layer['fill_opacity'],
+												stroke: true,
 											};
 										
 										// if point
@@ -364,10 +384,10 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 													            icon: new L.Icon({
 														            	iconUrl: image_url,
 																		shadowUrl: null,
-																		iconSize: new L.Point(20,20),//(32, 37),
+																		iconSize: new L.Point(layer['radius'], layer['radius']),
 																		shadowSize: null,
-																		iconAnchor: new L.Point(10, 10),
-																		popupAnchor: new L.Point(2, -20)
+																		iconAnchor: new L.Point(Math.ceil(layer['radius']/2), Math.ceil(layer['radius']/2)),
+																		popupAnchor: new L.Point(2, -layer['radius'])
 														            })
 													        });
 													    }																			
@@ -380,6 +400,7 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 													        );
 													    },
 													}; 
+												//console.log(style);
 											}
 										}
 
