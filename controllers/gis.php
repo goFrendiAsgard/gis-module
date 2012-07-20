@@ -7,7 +7,7 @@
  */
 class gis extends CMS_Controller {
 	
-    public function index($map_id=NULL, $longitude=NULL, $latitude=NULL){
+    public function index($map_id=NULL, $longitude=NULL, $latitude=NULL, $zoom=NULL){
     	$this->load->Model($this->cms_module_path().'/Map_Model');
     	if(!isset($map_id)){ //show list
     		$map = $this->Map_Model->get_map();
@@ -17,6 +17,7 @@ class gis extends CMS_Controller {
     		$map = $this->Map_Model->get_map($map_id);
     		if(isset($longitude)) $map["longitude"] = $longitude;
     		if(isset($latitude)) $map["latitude"] = $latitude;
+    		if(isset($zoom)) $map["zoom"] = $zoom;
     		$data = array("map"=> $map);
     		$this->view($this->cms_module_path().'/gis_index_map', $data, 'gis_index');    		
     	}
