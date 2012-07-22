@@ -415,10 +415,8 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 											// the popups
 											if (e.properties && e.properties.popupContent) {
 										        popupContent = e.properties.popupContent;
-										    }else{
-											    popupContent = '';
-										    }
-										    e.layer.bindPopup(popupContent);
+										        e.layer.bindPopup(popupContent);
+										    }										    
 		
 										    // the style (for point we need special treatment)
 										    if(!is_point){
