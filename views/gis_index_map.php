@@ -35,8 +35,49 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 	    }
 	    
 	</style>
+	
+</head>
+<body>
+	<div id="map" style="height: <?php echo $map["height"]; ?>; width: <?php echo $map["width"]; ?>"></div>
+	<div id="message"></div>
+	<?php 
+		$html = "";
+		// make the checkboxes
+		$need_search_form = FALSE;
+		for($i=0; $i<count($map["layer_groups"]); $i++){
+			$group = $map["layer_groups"][$i];
+			$layers = $group["layers"];
+			for($j=0; $j<count($layers); $j++){	
+				$layer = $layers[$j];			
+				$layer_searchable = $layer["searchable"]>0;
+				if($layer_searchable){
+					$need_search_form = TRUE;
+					$layer_name = $layer['layer_name'];
+					$html.= '<label class=".checkbox"> 
+						<input id="gis_search_layer_'.$i.'_'.$j.'" name="options" type="checkbox" value="'.$layer_name.'" checked />'.
+						$layer_name.'</label>&nbsp;&nbsp;';
+				}
+			}
+		}
+		// make the search form if needed
+		if($need_search_form){
+			$html.= '<div class="well form-inline">
+				<input id="gis_search_keyword" type="text" />
+				<input id="btn_gis_search" type="button" value="Search On The Map" />
+			</div>';	
+		}
+		if($html != ""){
+			echo '<div class="well form-inline">'.$html.'</div>';
+			echo '<div id="gis_search_result"></div>';
+		}
+	?>
+</body>
+
+
+
+	<script type="text/javascript" src ="<?php echo base_url().'assets/nocms/js/jquery.js';?>"></script>
 	<script type="text/javascript" src="<?php echo base_url(); ?>modules/<?php echo $gis_path; ?>/assets/js/leaflet/dist/leaflet.js"></script>
-	<script type="text/javascript" src="<?php echo base_url(); ?>modules/<?php echo $gis_path; ?>/assets/js/leaflet-label/Label.js"></script>
+	<script type="text/javascript" src="<?php echo base_url(); ?>modules/<?php echo $gis_path; ?>/assets/js/leaflet-label/Label.js"></script>	
 	<?php
 	// only load google's stuff if needed
 	if ($map["gmap_roadmap"] || $map["gmap_satellite"] || $map["gmap_hybrid"]){	
@@ -47,7 +88,6 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 		echo '<script type="text/javscript" src="'.$map["scripts"][$i].'"></script>';
 	}
 	?>	
-	<script type="text/javascript" src="<?php echo base_url(); ?>modules/<?php echo $gis_path; ?>/assets/js/jquery/jquery-1.7.2.min.js"></script>
 	<script type="text/javascript">
 		// variables from php
 		var map_longitude = <?php echo $map["longitude"]; ?>;
@@ -536,39 +576,3 @@ $gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 		
 		});
 	</script>
-</head>
-<body>
-	<div id="map" style="height: <?php echo $map["height"]; ?>; width: <?php echo $map["width"]; ?>"></div>
-	<div id="message"></div>
-	<?php 
-		$html = "";
-		// make the checkboxes
-		$need_search_form = FALSE;
-		for($i=0; $i<count($map["layer_groups"]); $i++){
-			$group = $map["layer_groups"][$i];
-			$layers = $group["layers"];
-			for($j=0; $j<count($layers); $j++){	
-				$layer = $layers[$j];			
-				$layer_searchable = $layer["searchable"]>0;
-				if($layer_searchable){
-					$need_search_form = TRUE;
-					$layer_name = $layer['layer_name'];
-					$html.= '<label class=".checkbox"> 
-						<input id="gis_search_layer_'.$i.'_'.$j.'" name="options" type="checkbox" value="'.$layer_name.'" checked />'.
-						$layer_name.'</label>&nbsp;&nbsp;';
-				}
-			}
-		}
-		// make the search form if needed
-		if($need_search_form){
-			$html.= '<div class="well form-inline">
-				<input id="gis_search_keyword" type="text" />
-				<input id="btn_gis_search" type="button" value="Search On The Map" />
-			</div>';	
-		}
-		if($html != ""){
-			echo '<div class="well form-inline">'.$html.'</div>';
-			echo '<div id="gis_search_result"></div>';
-		}
-	?>
-</body>
