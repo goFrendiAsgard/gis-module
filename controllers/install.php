@@ -216,11 +216,20 @@ class Install extends CMS_Module_Installer {
 				( '76',geomfromtext('POINT(-131.57223510887206 55.04243469211528)'),'76','US11438','108.000','Airport/Airfield','PANT','ANNETTE ISLAND','Other');
         		
         ");
+        
+        $original_directory = 'gis';
+        $module_url = $this->cms_module_path();
+        $module_main_controller_url = '';
+        if($module_url != $original_directory){
+        	$module_main_controller_url = $module_url.'/'.$original_directory;
+        }else{
+        	$module_main_controller_url = $module_url;
+        }
 
-        $this->add_navigation("gis_index", "Geographic Information System", $this->cms_module_path()."/index", 1);
-        $this->add_navigation("gis_map", "Map", $this->cms_module_path()."/gis_map", 4, "gis_index");        
-        $this->add_navigation("gis_cloudmade_basemap", "Cloudmade Base", $this->cms_module_path()."/gis_cloudmade_basemap", 4, "gis_index");
-        $this->add_navigation("gis_layer", "Layer", $this->cms_module_path()."/gis_layer", 4, "gis_index");
+        $this->add_navigation("gis_index", "Geographic Information System", $module_main_controller_url."/index", 1);
+        $this->add_navigation("gis_map", "Map", $module_main_controller_url."/gis_map", 4, "gis_index");        
+        $this->add_navigation("gis_cloudmade_basemap", "Cloudmade Base", $module_main_controller_url."/gis_cloudmade_basemap", 4, "gis_index");
+        $this->add_navigation("gis_layer", "Layer", $module_main_controller_url."/gis_layer", 4, "gis_index");
 
     }
 }
