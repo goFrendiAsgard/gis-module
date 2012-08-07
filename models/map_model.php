@@ -63,7 +63,7 @@
 				// json_url
 				$row["json_url"] = $this->cms_parse_keyword($row["json_url"]);
 				if($row["use_json_url"]==0){
-					$row["json_url"] = $this->cms_parse_keyword('@site_url'.$this->cms_module_path().'/geojson/'.$row["layer_id"]);
+					$row["json_url"] = $this->cms_parse_keyword('@site_url'.$this->cms_module_path().'/gis/geojson/'.$row["layer_id"]);
 				}
 				unset($row["use_json_url"]);
 				
