@@ -34,7 +34,7 @@ class gis extends CMS_Controller {
     	$label = $config["json_label"];
     	$shape_column = $config["json_shape_column"];
     	
-    	echo $this->geoformat->sql2json($SQL, $shape_column, $popup_content, $label);
+    	$this->cms_show_html($this->geoformat->sql2json($SQL, $shape_column, $popup_content, $label));
     }
     
     public function search($layer_id, $keyword=NULL){
@@ -81,7 +81,7 @@ class gis extends CMS_Controller {
     				"longitude" => $real_long_column
     			);
     	}
-    	echo json_encode($data);
+    	$this->cms_show_json($data);
     	
     }
 

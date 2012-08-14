@@ -25,7 +25,7 @@ class Alaska_Airport extends CMS_Controller{
 		
 		$label = '@name';
 		
-		echo $this->geoformat->sql2json($SQL, $shape_column, $popup_content, $label);
+		$this->cms_show_html($this->geoformat->sql2json($SQL, $shape_column, $popup_content, $label));
 	}
 	
 }
