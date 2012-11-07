@@ -6,7 +6,7 @@ class Alaska_Airport extends CMS_Controller{
 	}
 	
 	public function geojson(){
-		$this->load->library($this->cms_module_path('gofrendi.gis.core').'/geoformat');
+		$this->load->Model($this->cms_module_path().'/GeoFormat');
 		
 		$SQL = "
 			SELECT `cat`, `name`, `use`, `elev`, astext(`shape`) as `shape` 
@@ -25,7 +25,7 @@ class Alaska_Airport extends CMS_Controller{
 		
 		$label = '@name';
 		
-		$this->cms_show_html($this->geoformat->sql2json($SQL, $shape_column, $popup_content, $label));
+		$this->cms_show_html($this->GeoFormat->sql2json($SQL, $shape_column, $popup_content, $label));
 	}
 	
 }

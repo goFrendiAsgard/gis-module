@@ -1,6 +1,3 @@
-<?php 
-$CI =& get_instance();
-$gis_path = $CI->cms_module_path('gofrendi.gis.core');?>
 <head>
 	<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>modules/<?php echo $gis_path; ?>/assets/js/leaflet/dist/leaflet.css" />
 	<!--[if lte IE 8]><link rel="stylesheet" href="<?php echo base_url(); ?>modules/<?php echo $gis_path; ?>/assets/js/leaflet/dist/leaflet.ie.css" /><![endif]-->

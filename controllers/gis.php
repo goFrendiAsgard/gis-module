@@ -18,14 +18,17 @@ class gis extends CMS_Controller {
     		if(isset($longitude)) $map["longitude"] = $longitude;
     		if(isset($latitude)) $map["latitude"] = $latitude;
     		if(isset($zoom)) $map["zoom"] = $zoom;
-    		$data = array("map"=> $map);
+    		$data = array(
+	    			"map"=> $map,
+	    			"gis_path"=> $this->cms_module_path('gofrendi.gis.core')
+				);
     		$this->view($this->cms_module_path().'/gis_index_map', $data, 'gis_index');    		
     	}
     }    
     
     public function geojson($layer_id){
     	$this->load->Model($this->cms_module_path().'/Map_Model');
-    	$this->load->library($this->cms_module_path().'/geoformat');
+		$this->load->Model($this->cms_module_path().'/GeoFormat');
     	
     	// get parameter from model
     	$config = $this->Map_Model->get_layer_json_parameter($layer_id);
@@ -33,8 +36,7 @@ class gis extends CMS_Controller {
     	$popup_content = $config["json_popup_content"];
     	$label = $config["json_label"];
     	$shape_column = $config["json_shape_column"];
-    	
-    	$this->cms_show_html($this->geoformat->sql2json($SQL, $shape_column, $popup_content, $label));
+    	$this->cms_show_html($this->GeoFormat->sql2json($SQL, $shape_column, $popup_content, $label));
     }
     
     public function search($layer_id, $keyword=NULL){
@@ -46,7 +48,7 @@ class gis extends CMS_Controller {
     	
     	// load model and library
     	$this->load->Model($this->cms_module_path().'/Map_Model');
-    	$this->load->library($this->cms_module_path().'/geoformat');
+		$this->load->Model($this->cms_module_path().'/GeoFormat');
     	
     	// get parameter from model
     	$config = $this->Map_Model->get_layer_search_parameter($layer_id);
@@ -58,7 +60,7 @@ class gis extends CMS_Controller {
     	// merge keyword into SQL
     	$search = array('@keyword');
     	$replace = array($keyword);
-    	$SQL = $this->geoformat->replace($SQL, $search, $replace);
+    	$SQL = $this->GeoFormat->replace($SQL, $search, $replace);
     	
     	$data = array();
     	$query = $this->db->query($SQL);
@@ -70,7 +72,7 @@ class gis extends CMS_Controller {
     			$search[] = '@'.$label;
     			$replace[] = $value;
     		}
-    		$real_result_content = $this->geoformat->replace($result_content, $search, $replace);
+    		$real_result_content = $this->GeoFormat->replace($result_content, $search, $replace);
     		
     		$real_lat_column = $row[$lat_column];
     		$real_long_column = $row[$long_column];
