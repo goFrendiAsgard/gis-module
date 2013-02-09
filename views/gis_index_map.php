@@ -70,9 +70,6 @@
 	?>
 </body>
 
-
-
-	<script type="text/javascript" src ="<?php echo base_url().'assets/nocms/js/jquery.js';?>"></script>
 	<script type="text/javascript" src="<?php echo base_url(); ?>modules/<?php echo $gis_path; ?>/assets/js/leaflet/dist/leaflet.js"></script>
 	<script type="text/javascript" src="<?php echo base_url(); ?>modules/<?php echo $gis_path; ?>/assets/js/leaflet-label/Label.js"></script>	
 	<?php

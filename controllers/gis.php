@@ -89,6 +89,7 @@ class gis extends CMS_Controller {
 
     public function gis_map(){
         $crud = new grocery_CRUD();
+		$crud->unset_jquery();
         $crud->set_table("gis_map");
         $crud->columns('map_name','map_desc', 'zoom', 'height', 'width', 'gmap_roadmap', 'gmap_satellite', 'gmap_hybrid');
         $crud->display_as('map_name','Map Name')
@@ -111,6 +112,7 @@ class gis extends CMS_Controller {
     
     public function gis_layer(){
     	$crud = new grocery_CRUD();
+		$crud->unset_jquery();
     	$crud->set_table("gis_layer");
     	$crud->columns('map_id','layer_name', 'layer_desc', 'shown');
     	$crud->display_as('map_id','Map Name')
@@ -154,6 +156,7 @@ class gis extends CMS_Controller {
     
     public function gis_cloudmade_basemap(){
     	$crud = new grocery_CRUD();
+		$crud->unset_jquery();
     	$crud->set_table("gis_cloudmade_basemap");
     	$crud->columns('map_id','basemap_name', 'url');
     	$crud->display_as('map_id','Map Name')
