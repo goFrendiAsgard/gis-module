@@ -91,7 +91,7 @@
 		var map_gmap_roadmap = <?php echo $map["gmap_roadmap"]; ?>;
 		var map_gmap_satellite = <?php echo $map["gmap_satellite"]; ?>;
 		var map_gmap_hybrid = <?php echo $map["gmap_hybrid"]; ?>;
-		var map_layer_groups = <?php echo json_encode($map["layer_groups"]); ?>
+		var map_layer_groups = <?php echo json_encode($map["layer_groups"]); ?>;
 
 		// google captions
 		var google_roadmap_caption = 'Google Roadmap';
@@ -502,7 +502,7 @@
 														};
 												}
 												
-												var label = geojson_feature['features'][i]['properties']['label']
+												var label = geojson_feature['features'][i]['properties']['label'];
 												var point_config = {
 														pointToLayer: function (latlng){
 													        return new L.Marker(latlng,{
