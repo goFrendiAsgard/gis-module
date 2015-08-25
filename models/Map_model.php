@@ -1,5 +1,5 @@
 <?php
-	class Map_Model extends CMS_Model{
+	class Map_model extends CMS_Model{
 		
 		public function get_map($map_id=NULL){
 			if(isset($map_id)){

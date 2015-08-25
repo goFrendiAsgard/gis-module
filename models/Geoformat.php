@@ -1,5 +1,5 @@
 <?php
-class GeoFormat extends CMS_Model{
+class Geoformat extends CMS_Model{
 	public function replace($str,$search,$replace){
 		if(count($search)==count($replace)){
 			for($i=0; $i<count($search); $i++){

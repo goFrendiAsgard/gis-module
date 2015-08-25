@@ -5,16 +5,16 @@
  *
  * @author theModuleGenerator
  */
-class gis extends CMS_Controller {
+class Gis extends CMS_Controller {
 	
     public function index($map_id=NULL, $longitude=NULL, $latitude=NULL, $zoom=NULL){
-    	$this->load->Model($this->cms_module_path().'/Map_Model');
+    	$this->load->Model($this->cms_module_path().'/map_model');
     	if(!isset($map_id)){ //show list
-    		$map = $this->Map_Model->get_map();
+    		$map = $this->map_model->get_map();
     		$data = array("map_list"=> $map);
     		$this->view($this->cms_module_path().'/gis_index_list', $data, 'gis_index');    		
     	}else{ //show the map
-    		$map = $this->Map_Model->get_map($map_id);
+    		$map = $this->map_model->get_map($map_id);
     		if(isset($longitude)) $map["longitude"] = $longitude;
     		if(isset($latitude)) $map["latitude"] = $latitude;
     		if(isset($zoom)) $map["zoom"] = $zoom;
@@ -27,16 +27,16 @@ class gis extends CMS_Controller {
     }    
     
     public function geojson($layer_id){
-    	$this->load->Model($this->cms_module_path().'/Map_Model');
-		$this->load->Model($this->cms_module_path().'/GeoFormat');
+    	$this->load->Model($this->cms_module_path().'/map_model');
+		$this->load->Model($this->cms_module_path().'/geoformat');
     	
     	// get parameter from model
-    	$config = $this->Map_Model->get_layer_json_parameter($layer_id);
+    	$config = $this->map_model->get_layer_json_parameter($layer_id);
     	$SQL = $config["json_sql"];
     	$popup_content = $config["json_popup_content"];
     	$label = $config["json_label"];
     	$shape_column = $config["json_shape_column"];
-    	$this->cms_show_html($this->GeoFormat->sql2json($SQL, $shape_column, $popup_content, $label));
+    	$this->cms_show_html($this->geoformat->sql2json($SQL, $shape_column, $popup_content, $label));
     }
     
     public function search($layer_id, $keyword=NULL){
@@ -47,11 +47,11 @@ class gis extends CMS_Controller {
     	$keyword = addslashes($keyword);
     	
     	// load model and library
-    	$this->load->Model($this->cms_module_path().'/Map_Model');
-		$this->load->Model($this->cms_module_path().'/GeoFormat');
+    	$this->load->Model($this->cms_module_path().'/map_model');
+		$this->load->Model($this->cms_module_path().'/geoformat');
     	
     	// get parameter from model
-    	$config = $this->Map_Model->get_layer_search_parameter($layer_id);
+    	$config = $this->map_model->get_layer_search_parameter($layer_id);
     	$SQL = $config["search_sql"];
     	$result_content = $config["search_result_content"];
     	$long_column = $config["search_result_x_column"];
@@ -60,7 +60,7 @@ class gis extends CMS_Controller {
     	// merge keyword into SQL
     	$search = array('@keyword');
     	$replace = array($keyword);
-    	$SQL = $this->GeoFormat->replace($SQL, $search, $replace);
+    	$SQL = $this->geoformat->replace($SQL, $search, $replace);
     	
     	$data = array();
     	$query = $this->db->query($SQL);
@@ -72,7 +72,7 @@ class gis extends CMS_Controller {
     			$search[] = '@'.$label;
     			$replace[] = $value;
     		}
-    		$real_result_content = $this->GeoFormat->replace($result_content, $search, $replace);
+    		$real_result_content = $this->geoformat->replace($result_content, $search, $replace);
     		
     		$real_lat_column = $row[$lat_column];
     		$real_long_column = $row[$long_column];
@@ -88,7 +88,7 @@ class gis extends CMS_Controller {
     }
 
     public function gis_map(){
-        $crud = new grocery_CRUD();
+        $crud = $this->new_crud();
 		$crud->unset_jquery();
         $crud->set_table("gis_map");
         $crud->columns('map_name','map_desc', 'zoom', 'height', 'width', 'gmap_roadmap', 'gmap_satellite', 'gmap_hybrid');
@@ -111,7 +111,7 @@ class gis extends CMS_Controller {
     }
     
     public function gis_layer(){
-    	$crud = new grocery_CRUD();
+    	$crud = $this->new_crud();
 		$crud->unset_jquery();
     	$crud->set_table("gis_layer");
     	$crud->columns('map_id','layer_name', 'layer_desc', 'shown');
@@ -155,7 +155,7 @@ class gis extends CMS_Controller {
     }
     
     public function gis_cloudmade_basemap(){
-    	$crud = new grocery_CRUD();
+    	$crud = $this->new_crud();
 		$crud->unset_jquery();
     	$crud->set_table("gis_cloudmade_basemap");
     	$crud->columns('map_id','basemap_name', 'url');

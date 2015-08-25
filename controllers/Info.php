@@ -4,17 +4,17 @@
  *
  * @author theModuleGenerator
  */
-class Install extends CMS_Module_Installer {
+class Info extends CMS_Module {
     protected $DEPENDENCIES = array();
     protected $NAME = 'gofrendi.gis.core';
 
     //this should be what happen when user install this module
-    protected function do_install(){
+    protected function do_activate(){
         $this->remove_all();
         $this->build_all();
     }
     //this should be what happen when user uninstall this module
-    protected function do_uninstall(){
+    protected function do_deactivate(){
         $this->remove_all();
     }
     
@@ -26,10 +26,10 @@ class Install extends CMS_Module_Installer {
     	//example layer
     	$this->db->query('DROP TABLE IF EXISTS `gis_alaska_airport`;');
 
-        $this->remove_navigation("gis_map");        
-        $this->remove_navigation("gis_cloudmade_basemap");
-        $this->remove_navigation("gis_layer");
-        $this->remove_navigation("gis_index");
+        $this->cms_remove_navigation("gis_map");        
+        $this->cms_remove_navigation("gis_cloudmade_basemap");
+        $this->cms_remove_navigation("gis_layer");
+        $this->cms_remove_navigation("gis_index");
     }
     
     private function build_all(){
@@ -227,10 +227,10 @@ class Install extends CMS_Module_Installer {
         	$module_main_controller_url = $module_url;
         }
 
-        $this->add_navigation("gis_index", "Geographic Information System", $module_main_controller_url."/index", 1);
-        $this->add_navigation("gis_map", "Map", $module_main_controller_url."/gis_map", 4, "gis_index");        
-        $this->add_navigation("gis_cloudmade_basemap", "Cloudmade Base", $module_main_controller_url."/gis_cloudmade_basemap", 4, "gis_index");
-        $this->add_navigation("gis_layer", "Layer", $module_main_controller_url."/gis_layer", 4, "gis_index");
+        $this->cms_add_navigation("gis_index", "Geographic Information System", $module_main_controller_url."/index", 1);
+        $this->cms_add_navigation("gis_map", "Map", $module_main_controller_url."/gis_map", 4, "gis_index");        
+        $this->cms_add_navigation("gis_cloudmade_basemap", "Cloudmade Base", $module_main_controller_url."/gis_cloudmade_basemap", 4, "gis_index");
+        $this->cms_add_navigation("gis_layer", "Layer", $module_main_controller_url."/gis_layer", 4, "gis_index");
 
     }
 }

@@ -1,12 +1,12 @@
 <?php
-class Alaska_Airport extends CMS_Controller{
+class Alaska_airport extends CMS_Controller{
 	
 	public function index(){
 		
 	}
 	
 	public function geojson(){
-		$this->load->Model($this->cms_module_path().'/GeoFormat');
+		$this->load->Model($this->cms_module_path().'/geoformat');
 		
 		$SQL = "
 			SELECT `cat`, `name`, `use`, `elev`, astext(`shape`) as `shape` 
@@ -25,7 +25,7 @@ class Alaska_Airport extends CMS_Controller{
 		
 		$label = '@name';
 		
-		$this->cms_show_html($this->GeoFormat->sql2json($SQL, $shape_column, $popup_content, $label));
+		$this->cms_show_html($this->geoformat->sql2json($SQL, $shape_column, $popup_content, $label));
 	}
 	
 }
